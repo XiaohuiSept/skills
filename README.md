@@ -11,20 +11,6 @@ The skill helps coding agents such as Codex, Claude Code, OpenCode, and similar 
 generate frontend pages that look like the KubeSphere Enterprise console instead of generic
 admin templates.
 
-Current scope:
-
-- High-fidelity generic resource list pages
-- KubeSphere-like top navigation
-- Cluster / Workspace management entries
-- Component Dock
-- Light resource sidebar
-- Scoped cluster/workspace selector
-- Compact page title band
-- Integrated toolbar, table, and pagination
-- KubeSphere object identity pattern for resource names and cards
-
-The skill is designed to be portable. It does not require private KubeSphere console source
-code or a local `kube-design` checkout.
 
 ## Repository Structure
 
@@ -156,38 +142,8 @@ Before building the UI, read agent/SKILL.md and agent/DESIGN.md. SKILL.md contro
 DESIGN.md controls visual fidelity.
 ```
 
-## Important Constraints
-
-- The skill should not require `kse-console-kse` or any private repository.
-- The skill should not require a local `kube-design` source checkout.
-- The consuming project should provide `@kubed/components` and `@kubed/icons`, or the agent
-  should adapt to whatever public kube-design APIs are installed.
-- The UI should stay light by default. Do not generate a dark sidebar.
-- Generated pages should not include breadcrumb navigation unless explicitly requested.
-- The first viewport should look like KubeSphere Enterprise before the resource data is
-  judged.
-
-## Expected Output Quality
-
-A good generated page should have:
-
-- `64px` white global header
-- Real or restrained KubeSphere logo
-- Cluster / Workspace top management entries
-- Component Dock before the user menu
-- `220px` light sidebar
-- Scoped selector tied to the active management view
-- Compact `56px` page title band
-- One integrated list surface
-- FilterInput-style search
-- White table header
-- Dense `56px` resource rows
-- Object Identity Pattern name cells
-- Attached pagination
 
 ## References
 
-- [OpenAI skills catalog](https://github.com/openai/skills)
-- [Claude Code settings and custom instructions](https://code.claude.com/docs/en/settings)
-- [OpenCode instructions](https://opencode.school/lessons/instructions/)
 - [AGENTS.md](https://agents.md/)
+- [DESIGN.md](https://stitch.withgoogle.com/docs/design-md/overview/)
