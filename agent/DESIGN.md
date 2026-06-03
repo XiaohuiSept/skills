@@ -123,7 +123,9 @@ components, not a new design system.
 
 ### CSS Contract For Generated Pages
 
-Generated pages should define or preserve these values:
+Generated pages should define or preserve these values. Treat this block as the strict
+numeric and color authority for generic generated pages; do not scatter competing pixel
+values or alternate palettes elsewhere in the implementation.
 
 ```css
 :root {
@@ -144,14 +146,19 @@ Generated pages should define or preserve these values:
   --ks-text: #242e42;
   --ks-muted: #79879c;
   --ks-nav-text: #4a5974;
-  --ks-active: #55bc8a;
-  --ks-icon-active: #00aa72;
-  --ks-icon-active-fill: #90e0c5;
+  --ks-active: #55bc8a;              /* active nav text, success/running dot */
+  --ks-icon-active: #00aa72;         /* selected sidebar icon primary/color */
+  --ks-icon-active-fill: #90e0c5;    /* selected sidebar icon secondary/fill */
+  --ks-command-hover: #181d28;
+  --ks-warning: #f5a623;
+  --ks-error: #ca2621;
 }
 ```
 
 Use these as layout and color anchors even if the consuming project uses different class
-names. Do not introduce a different palette for generic pages.
+names. Do not introduce a different palette for generic pages. If the consuming project
+already defines equivalent theme tokens, map these semantics to those tokens instead of
+duplicating both systems.
 
 ## Visual Foundations
 
@@ -216,6 +223,14 @@ font-family:
 | Default UI text | `12px` | `400-600` | Tables, controls, nav, helper text |
 | Muted text | `12px` | `400` | Secondary lines and descriptions |
 Do not scale font size with viewport width. Avoid hero typography on console pages.
+
+### Language Consistency
+
+Use one UI language per generated page. If the consuming product context is Chinese, render
+navigation labels, selector subtitles, buttons, table headers, and pagination in Chinese. If
+the context is English, keep them in English. Do not mix English parent menu labels with
+Chinese child labels or vice versa unless the consuming product already has that exact
+mixed-language convention.
 
 ### Spacing And Shape
 
@@ -341,6 +356,9 @@ Component Dock (`组件坞`) is a persistent action before the user profile menu
 - Runtime component: `ExtensionsEntry`.
 - Text key: `ComponentDock`.
 - Icon asset: `/assets/grid.svg`, backed by `packages/bootstrap/assets/grid.svg`.
+- If `/assets/grid.svg` is unavailable in the consuming project, use a semantic
+  `@kubed/icons` app/grid/dashboard-style fallback. Keep the same button size, placement,
+  label, and hover behavior. Do not replace Component Dock with a gear/settings action.
 - Button display: inline-flex, centered, `36px` high.
 - Minimum width: about `84px`; horizontal padding `0 16px`.
 - Radius: `18px` by default.
@@ -414,7 +432,8 @@ context; project/cluster filters belong in the page or toolbar when needed.
 - Row rhythm: `36px` height with small vertical gaps. Do not add large section blocks.
 - Expanded child row: text-only, `x=48`, width about `160px`, height `36px`.
 - Inactive child color: `#242e42`, weight `400`.
-- Child rows usually do not need icons.
+- Child rows default to no icons. Only add child-row icons when the user explicitly requests
+  them or when the consuming product shell already renders that exact submenu with icons.
 
 #### Active State
 
@@ -605,7 +624,8 @@ Use kube-design primitives wherever possible:
 | Need | Prefer |
 |---|---|
 | Buttons | `Button` |
-| Inputs/search | `Input` with `Magnifier` icon |
+| Search | `FilterInput` if exported; otherwise a local FilterInput-style wrapper |
+| Plain inputs | `Input` |
 | Select/filter | `Select` |
 | Tables | `Table` / local table pattern backed by kube-design styles |
 | Cards/surfaces | `Card` or small local surface wrapper |
@@ -617,6 +637,10 @@ Use kube-design primitives wherever possible:
 If a component API is uncertain, rely on the consuming project's existing imports,
 TypeScript/build feedback, installed package documentation, or public `kube-design`
 upstream references when internet access is available.
+
+Use the consuming project's existing CSS approach first: styled/emotion patterns, CSS
+modules, project utility classes, or colocated stylesheets. Avoid large inline `<style>`
+blocks in React components unless the project is only a single-file demo.
 
 If a high-level component cannot match the live-console layout, compose the surface
 manually. For example, a resource table can be a local white wrapper with a toolbar,
@@ -666,6 +690,8 @@ Reject and revise if any of these appear:
   field-like switcher.
 - Sidebar using section-caption blocks instead of the resource tree pattern.
 - Parent sidebar labels wrapping to two lines or increasing the `36px` row height.
+- Child sidebar rows rendered with icons by default; child rows should be text-only unless
+  explicitly requested.
 - Sidebar active state as dark filled row, thick left border, or large colored pill.
 - Sidebar icons from lucide, emoji, custom placeholder SVG, or random abstract icons.
 - Page title rendered as a hero.
@@ -673,6 +699,8 @@ Reject and revise if any of these appear:
 - Toolbar/table/pagination split into separate cards.
 - Resource search rendered as a narrow fixed-width pill instead of filling the toolbar
   center channel.
+- Resource search rendered as a plain square white input instead of the FilterInput-style
+  pale rounded control.
 - Table stretched so wide that columns become sparse and hard to scan.
 - Only 4-5 rows shown on a full list page with available mock data.
 - Oversized filters and large form controls in the table toolbar.
@@ -685,10 +713,15 @@ Before considering a generated page visually acceptable:
 
 - The implementation does not require private console repositories unless the current user
   explicitly provided and requested them.
+- UI language is consistent across navigation, selectors, buttons, table headers, and
+  pagination.
+- CSS follows the consuming project's style approach and preserves the strict values in the
+  CSS contract.
 - Global top nav is present and `64px` high.
 - Logo area, Cluster/Workspace management entries, and Component Dock match KubeSphere proportions.
 - Sidebar is light, `220px` by default, with scoped selector and resource tree.
 - Sidebar icons are from `@kubed/icons` and match resource semantics.
+- Child sidebar rows are text-only by default.
 - Active sidebar state is quiet green text/icon by default.
 - Page header is compact, white, `56px` by default, with `18px` title.
 - Generated console pages do not include breadcrumb navigation unless the user explicitly requests it.
