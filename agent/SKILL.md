@@ -144,7 +144,7 @@ When a private or consuming-app component is unavailable, decompose it:
 | Scoped selector | local field-like block with title, subtitle, chevron |
 | Page header | local white band with compact title, no breadcrumb |
 | List surface | local white wrapper containing toolbar, table, footer |
-| Identity cell | icon + bold name + muted secondary line |
+| Identity cell | Object Identity Pattern: `40px` semantic icon + `12px` gap + two-line text |
 | Status cell | `StatusDot` plus text |
 | Action menu | `Dropdown` + `Menu` + `MenuItem` |
 
@@ -192,7 +192,7 @@ For mock list pages, include 8-10 visible rows at desktop baseline. Minimum colu
 | Column | Example | Notes |
 |---|---|---|
 | Selection | checkbox | Compact, first column |
-| Name | `nginx-frontend` | Bold name with semantic resource icon and optional muted line |
+| Name | `nginx-frontend` | Object Identity Pattern: `40px` semantic icon, `12px` gap, bold title, muted description |
 | Status | `Running`, `Updating`, `Error` | Dot plus text |
 | Scope | `default`, `production` | Namespace/project/workspace as relevant |
 | Resource attribute | `3/3`, `nginx:1.21`, `ClusterIP` | 1-3 resource-specific columns |
@@ -215,6 +215,7 @@ Reject and revise if any of these appear:
 | Scoped selector oversized or with large decorative icon | Compact field-like selector tied to active management view |
 | Parent sidebar labels wrap to two lines | `36px` single-line row with ellipsis |
 | Child nav rows all have icons | Child rows are text-only by default unless requested |
+| Name column is plain text or uses a small/generic avatar | Object Identity Pattern with `40px` icon and `12px` text gap |
 | Sidebar active row uses dark fill, thick bar, or big pill | Quiet green text/icon active state |
 | Sidebar icons from lucide/emoji/custom placeholder SVG | Semantic `@kubed/icons` |
 | Breadcrumb navigation appears by default | No breadcrumb unless explicitly requested |
@@ -243,8 +244,10 @@ Always check:
 8. No breadcrumb appears unless explicitly requested.
 9. List page uses one integrated toolbar/table/pagination surface.
 10. Search is FilterInput-style, `32px` high, and fills the toolbar center channel.
-11. Table header is white; rows are about `56px`; pagination is attached.
-12. Selected sidebar duotone icons use `--ks-icon-active` and `--ks-icon-active-fill`.
+11. Resource name cells and resource list cards use the Object Identity Pattern: `40px`
+    semantic icon, `12px` gap, bold primary title, regular muted description, ellipsis.
+12. Table header is white; rows are about `56px`; pagination is attached.
+13. Selected sidebar duotone icons use `--ks-icon-active` and `--ks-icon-active-fill`.
 
 ### Runtime Verification
 
