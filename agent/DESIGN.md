@@ -196,6 +196,33 @@ KubeSphere icons are usually duotone. The icon variant must match the background
 Use the light variant whenever an icon sits on a dark filled button or dark selected block.
 Do not reuse the default dark duotone colors on a dark background.
 
+### Object Identity Pattern
+
+KubeSphere often represents a resource, application, cluster, workspace, user-facing object,
+or selectable record with a compact identity block. This pattern appears in table name
+columns, resource list cards, selector rows, detail headers, modal records, and quota/list
+items. It is one of the strongest small-scale visual signatures of the console.
+
+Structure:
+
+- Left icon/image: `40px x 40px`.
+- Gap between icon and text stack: `12px`.
+- Text stack: two lines, vertically centered with the icon.
+- Title line: `12px`, bold/`600-700`, `--ks-text` / text-primary (`#242e42`).
+- Description line: `12px`, regular, `--ks-muted` / text-secondary (`#79879c`).
+- Line height: about `20px` (`1.67`).
+- Both title and description should ellipsize when space is limited.
+- Use semantic `@kubed/icons` or real object images/assets. Do not use decorative
+  placeholder icons.
+
+Optional status:
+
+- When an object needs a health/running marker, a small `8px` status indicator may be
+  anchored to the lower-right of the `40px` icon.
+
+Do not replace this pattern with a plain text-only name cell, oversized avatar, badge-only
+cell, generic `32px` icon row, or loosely spaced media object.
+
 ### Typography
 
 Use the KubeSphere/kube-design compact type system.
@@ -566,7 +593,8 @@ Do not use a square white input with a strong border for the resource list searc
   - 1-3 resource-specific attributes
   - created/updated time
   - row actions
-- Identity cell combines compact resource icon, bold name, and optional muted secondary line.
+- Identity/name cells must follow the Object Identity Pattern: `40px` semantic icon,
+  `12px` gap, bold primary title, muted regular description, and ellipsis on both lines.
 - Status uses `StatusDot` or equivalent dot plus text.
 - Tags are compact and neutral. Avoid colorful tag soup.
 - Row hover can use a very pale background. Avoid colored row bands.
@@ -584,8 +612,8 @@ Table CSS target:
 | Row hover | `#eff4f9` |
 | Selected row | pale background with `#55bc8a` border |
 
-The first column should be visually rich. A plain text-only first column makes the page
-look unlike the live console.
+The first column should be visually rich and recognizable as an object identity block. A
+plain text-only first column makes the page look unlike the live console.
 
 ### Pagination
 
@@ -631,7 +659,7 @@ Use kube-design primitives wherever possible:
 | Cards/surfaces | `Card` or small local surface wrapper |
 | Status | `StatusDot`, compact tags/badges |
 | Menus | `Dropdown` + `Menu` + `MenuItem` |
-| Resource identity | `Entity` when a rich row/card identity is needed |
+| Resource/object identity | `Field`, `Entity`, or local Object Identity Pattern composition |
 | Icons | `@kubed/icons` only |
 
 If a component API is uncertain, rely on the consuming project's existing imports,
