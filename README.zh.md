@@ -11,21 +11,6 @@
 `kube-design` / `@kubed/components` / `@kubed/icons` 能力，生成具有 KubeSphere
 控制台风格的页面。
 
-当前优先覆盖：
-
-- 高还原度通用资源列表页
-- KubeSphere 顶部导航
-- 集群 / 企业空间管理入口
-- 组件坞
-- 浅色资源侧边栏
-- 集群 / 企业空间作用域选择器
-- 紧凑页面标题区域
-- 一体化 toolbar、table、pagination
-- 资源名称和卡片中的 Object Identity Pattern
-
-这套 skill 是可移植的，不要求使用私有的 KubeSphere 控制台源码，也不要求本地提前
-准备 `kube-design` 源码。
-
 ## 仓库结构
 
 ```text
@@ -150,37 +135,8 @@ Before building the UI, read agent/SKILL.md and agent/DESIGN.md. SKILL.md contro
 DESIGN.md controls visual fidelity.
 ```
 
-## 重要约束
-
-- 不应该要求读取或依赖 `kse-console-kse` 等私有仓库。
-- 不应该要求本地提前准备 `kube-design` 源码。
-- 项目应提供 `@kubed/components` 和 `@kubed/icons`，或者让 agent 根据已安装的公开
-  kube-design API 适配。
-- 默认必须是浅色 UI，不要生成深色侧边栏。
-- 默认不要生成面包屑，除非用户明确要求。
-- 首屏必须先像 KubeSphere Enterprise 控制台，再判断具体资源内容。
-
-## 预期生成质量
-
-一个合格页面应该包含：
-
-- `64px` 白色顶部导航
-- 真实或克制的 KubeSphere logo
-- 集群 / 企业空间顶部管理入口
-- 用户菜单前的组件坞
-- `220px` 浅色侧边栏
-- 与当前管理视角匹配的作用域选择器
-- 紧凑的 `56px` 页面标题栏
-- 一体化列表区域
-- FilterInput 风格搜索框
-- 白色表头
-- 紧凑的 `56px` 资源行
-- Object Identity Pattern 名称单元格
-- 附着在表格底部的分页器
 
 ## 参考链接
 
-- [OpenAI skills catalog](https://github.com/openai/skills)
-- [Claude Code settings and custom instructions](https://code.claude.com/docs/en/settings)
-- [OpenCode instructions](https://opencode.school/lessons/instructions/)
 - [AGENTS.md](https://agents.md/)
+- [DESIGN.md](https://stitch.withgoogle.com/docs/design-md/overview/)
