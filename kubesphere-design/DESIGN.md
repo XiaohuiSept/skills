@@ -191,12 +191,30 @@ KubeSphere icons are usually duotone. The icon variant must match the background
 
 | Background | Icon variant | Primary/color | Secondary/fill |
 |---|---|---:|---:|
-| Light background | `dark` | `#242e42` | `#b6c2cd` |
+| Light background | `dark` | `#324558` | `#b6c2cd` |
 | Dark background | `light` | `rgba(255,255,255,0.9)` | `#ffffff66` |
 | Selected sidebar on light background | custom active | `#00aa72` | `#90e0c5` |
 
-Use the light variant whenever an icon sits on a dark filled button or dark selected block.
-Do not reuse the default dark duotone colors on a dark background.
+Source-derived rule: generated `@kubed/icons` SVG components use `color` for the primary
+path and `fill` for the secondary path. Do not recolor duotone icons with CSS `color`
+alone, because the secondary fill will remain wrong. When an icon changes state, set both
+channels explicitly:
+
+```tsx
+// Inactive on a light background: preserve kube-design defaults.
+<Deployment size={20} />
+
+// Active sidebar item.
+<Deployment size={20} color="#00aa72" fill="#90e0c5" />
+
+// Active top navigation icon on a dark selected button.
+<Cluster size={24} color="rgba(255,255,255,0.9)" fill="#ffffff66" />
+```
+
+Use the light variant values whenever an icon sits on a dark filled button or dark selected
+block. Do not reuse default dark duotone colors on a dark background. Do not use monochrome
+SVGs, CSS-mask icons, lucide icons, emoji, or hand-drawn placeholders for product/resource
+navigation.
 
 ### Object Identity Pattern
 
@@ -546,6 +564,11 @@ content. The live-console green text/icon active state is the default.
   `BlueGreenDeployment` unless the menu is specifically for blue-green deployment.
 - Do not use emoji, lucide icons, hand-written SVG, or random abstract placeholders for
   resource menus.
+- Inactive icons should preserve the kube-design duotone defaults (`color="#324558"`,
+  `fill="#b6c2cd"`). Active sidebar icons must set both `color="#00aa72"` and
+  `fill="#90e0c5"`.
+- Do not render active icons as a single green glyph, a green dot plus text, a black solid
+  block, or a CSS-only recolored icon with the wrong secondary fill.
 
 ## Page Layout
 
@@ -616,8 +639,11 @@ main
 - Refresh icon: use `Refresh` from `@kubed/icons`.
 - Column settings icon: use `Cogwheel` from `@kubed/icons`; it opens custom column
   visibility controls. This is table settings, not Component Dock.
-- Icon buttons use text/ghost button styling, keep intrinsic `32px` control rhythm, and
-  have `12px` left spacing between the right-side actions.
+- Icon buttons use kube-design text button styling: `Button variant="text"` with transparent
+  border/background at rest, no shadow, and subtle hover only. They should keep the same
+  compact `32px` control rhythm as the dark create button, but they must not look like
+  filled square tiles, outlined buttons, or persistent pale backgrounds.
+- Icon buttons have about `12px` left spacing between the right-side actions.
 - Create button is dark, pill-like, `32px` high, at far right.
 - Avoid large multi-filter forms above the table unless the task requires advanced filtering.
 - Search and select controls should remain `32px` high. Do not use `40px+` dashboard-sized
@@ -663,10 +689,18 @@ Do not use a square white input with a strong border for the resource list searc
   - row actions
 - Identity/name cells must follow the Object Identity Pattern: `40px` semantic icon,
   `12px` gap, bold primary title, muted regular description, and ellipsis on both lines.
+- Resource table icons should be the semantic `@kubed/icons` component for the resource
+  kind, usually rendered at `40px` inside a quiet `40px x 40px` icon area. For example,
+  Pod rows use `<Pod size={40} />`; Deployment rows use the semantic deployment icon when
+  available. Do not wrap table icons in heavy bordered cards, do not shrink them to generic
+  `16px-24px` glyphs, and do not replace them with custom mini diagrams.
 - Status uses `StatusDot` or equivalent dot plus text.
 - Tags are compact and neutral. Avoid colorful tag soup.
 - Row hover can use a very pale background. Avoid colored row bands.
 - Row actions sit at the far right, usually as vertical overflow.
+- Row overflow action uses `More` from `@kubed/icons`, `size={16}`, inside a compact
+  `Button variant="text"` trigger. It is borderless and backgroundless at rest. Do not use
+  a boxed kebab button, a filled square, or a text-only `...` trigger.
 
 Table CSS target:
 
@@ -679,10 +713,21 @@ Table CSS target:
 | Row height | `56px` |
 | Row divider | `1px solid #eff4f9` |
 | Row hover | `#eff4f9` |
-| Selected row | pale background with `#55bc8a` border |
+| Selected row | `tr.selected`: cells use pale `#eff4f9` / `accents_1` background and a `1px` green border outline assembled from first/last/top/bottom cell borders |
 
 The first column should be visually rich and recognizable as an object identity block. A
 plain text-only first column makes the page look unlike the live console.
+
+Selected rows must follow the kube-design table behavior:
+
+- Selection is a table row state (`tr.selected` / `row-selected`), not an unrelated custom
+  card state.
+- Selected cell background is the same quiet pale background as hover (`#eff4f9` or the
+  project theme `accents_1`).
+- The selected row boundary is a thin `1px` green outline using the success green
+  (`#55bc8a` / theme green token) on the first/last/top/bottom edges.
+- Do not use a thick green left bar, strong blue row fill, large checkbox highlight, or
+  full-card selection block.
 
 ### Pagination
 
@@ -797,6 +842,10 @@ Reject and revise if any of these appear:
   explicitly requested.
 - Sidebar active state as dark filled row, thick left border, or large colored pill.
 - Sidebar icons from lucide, emoji, custom placeholder SVG, or random abstract icons.
+- Sidebar active duotone icons recolored with CSS `color` only, leaving the secondary fill
+  wrong. Active state must set both `color="#00aa72"` and `fill="#90e0c5"`.
+- Sidebar or table resource icons rendered as single-color black blocks instead of
+  kube-design duotone icons.
 - Mixed Chinese and English labels in the same generated page.
 - Bilingual duplicate labels such as `Deployments / 部署`.
 - Fonts smaller than `12px` anywhere in the console UI.
@@ -805,11 +854,19 @@ Reject and revise if any of these appear:
 - Toolbar/table/pagination split into separate cards.
 - Toolbar missing the fixed refresh action.
 - Toolbar missing the fixed Cogwheel/custom-column action.
+- Refresh/Cogwheel toolbar actions rendered as filled pale square tiles or outlined buttons;
+  they should be borderless/backgroundless text-button icon triggers at rest.
 - Resource search rendered as a narrow fixed-width pill instead of filling the toolbar
   center channel.
 - Resource search rendered as a plain square white input instead of the FilterInput-style
   pale rounded control.
 - Table header/body touching the list surface edge instead of using `margin: 0 12px 12px`.
+- Table resource icons rendered as small custom diagrams, boxed avatars, or generic glyphs
+  instead of `40px` semantic kube-design icons.
+- Table selected row rendered with a thick green left bar, strong blue fill, or custom
+  checkbox-only highlight instead of kube-design's pale row plus thin green outline.
+- Row overflow action rendered as a boxed/fill kebab button, a text-only ellipsis, or a
+  persistent-background square instead of `More size={16}` inside `Button variant="text"`.
 - Pagination rendered as a plain text summary instead of an attached footer control.
 - Table stretched so wide that columns become sparse and hard to scan.
 - Only 4-5 rows shown on a full list page with available mock data.
@@ -834,6 +891,8 @@ Before considering a generated page visually acceptable:
 - Logo area, Cluster/Workspace management entries, and Component Dock match KubeSphere proportions.
 - Sidebar is light, `220px` by default, with scoped selector and resource tree.
 - Sidebar icons are from `@kubed/icons` and match resource semantics.
+- Active sidebar icons explicitly set both duotone channels: primary `color="#00aa72"` and
+  secondary `fill="#90e0c5"`.
 - Child sidebar rows are text-only by default.
 - Active sidebar state is quiet green text/icon by default.
 - Page header is compact, white, `56px` by default, with `18px` title.
@@ -843,9 +902,17 @@ Before considering a generated page visually acceptable:
 - Toolbar is compact and integrated with the table.
 - Toolbar right side contains Refresh, Cogwheel/custom columns, then the dark create/action
   button.
+- Toolbar Refresh and Cogwheel controls are borderless/backgroundless `Button variant="text"`
+  icon buttons at rest, with only subtle hover feedback.
 - FilterInput-style search fills the center toolbar channel.
 - Table main wrapper is inset with `margin: 0 12px 12px`.
+- Table resource icons use semantic `@kubed/icons` at `40px`; they are not custom mini
+  diagrams or boxed avatars.
 - Table rows are dense, about `56px`, with realistic resource data.
+- Selected table rows use kube-design selected-row styling: pale cells plus a thin green
+  outline, not a thick left bar or custom strong fill.
+- Row overflow actions use `More size={16}` in a compact borderless `Button variant="text"`
+  trigger.
 - Pagination is attached to the table surface.
 - Empty state follows the same list surface and density.
 - The first viewport looks like KubeSphere Enterprise, not a generic admin UI.
