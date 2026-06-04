@@ -1,4 +1,4 @@
-# KubeSphere 控制台 Agent Skill
+# KubeSphere Design Skill
 
 [English](README.md)
 
