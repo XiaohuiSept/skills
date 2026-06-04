@@ -1,6 +1,6 @@
 ---
 name: kubesphere-design
-description: Design, build, or review KubeSphere Enterprise console-style React UI using public kube-design primitives. Use for KubeSphere-like console pages, especially resource list pages with the product header, light sidebar, scoped selector, integrated table toolbar, pagination, and Kubernetes resource identity patterns.
+description: Design, build, or review high-fidelity KubeSphere Enterprise console-style React interfaces using public kube-design primitives for Kubernetes and cloud-native management workflows..
 ---
 
 # KubeSphere Design
