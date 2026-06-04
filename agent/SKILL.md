@@ -1,11 +1,11 @@
 ---
-name: kube-design-agent
-description: Use when building, modifying, or reviewing React frontend pages that must look like the KubeSphere Enterprise console using public kube-design primitives. Focus on high-fidelity generic console resource list pages with the KubeSphere header, Cluster/Workspace management entries, Component Dock, light sidebar, scoped selector, compact page header, integrated list table, and pagination.
+name: kubesphere-design
+description: Design, build, or review KubeSphere Enterprise console-style React UI using public kube-design primitives. Use for KubeSphere-like console pages, especially resource list pages with the product header, light sidebar, scoped selector, integrated table toolbar, pagination, and Kubernetes resource identity patterns.
 ---
 
-# Kube Design Agent
+# KubeSphere Design
 
-Generate KubeSphere-style console pages with public `kube-design` primitives.
+Generate KubeSphere Enterprise console-style pages with public `kube-design` primitives.
 
 Current priority: **high-fidelity basic resource list pages**. For detail pages, creation
 flows, dashboards, or advanced business workflows, keep the console frame accurate and say
@@ -34,8 +34,8 @@ Assume the user only provides:
 
 Never require a local `kube-design` checkout. Public `kubesphere/kube-design` upstream or
 package documentation may be consulted only when internet access is available. Never require,
-inspect, import from, or depend on private repositories such as `kse-console-kse` unless the
-user explicitly provides that repository and asks to use it in the current task.
+inspect, import from, or depend on private console repositories unless the user explicitly
+provides one and asks to use it in the current task.
 
 ## Conflict Resolution
 
