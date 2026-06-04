@@ -1,4 +1,4 @@
-# KubeSphere Console Agent Skill
+# KubeSphere Design Skill
 
 [简体中文](README.zh.md)
 
