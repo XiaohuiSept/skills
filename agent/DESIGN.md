@@ -129,6 +129,7 @@ values or alternate palettes elsewhere in the implementation.
 
 ```css
 :root {
+  --ks-logo-url: url("https://ks-com-cn-staging.pek3b.qingstor.com/images/logo.svg");
   --ks-header-height: 64px;
   --ks-sidebar-width: 220px;
   --ks-sidebar-collapsed-width: 60px;
@@ -137,6 +138,7 @@ values or alternate palettes elsewhere in the implementation.
   --ks-control-height: 32px;
   --ks-nav-row-height: 36px;
   --ks-table-row-height: 56px;
+  --ks-min-font-size: 12px;
   --ks-bg: #eff4f9;
   --ks-surface: #ffffff;
   --ks-subtle: #f9fbfd;
@@ -249,15 +251,52 @@ font-family:
 | Sidebar scoped title | `14px` | `700` | Cluster/project selector title |
 | Default UI text | `12px` | `400-600` | Tables, controls, nav, helper text |
 | Muted text | `12px` | `400` | Secondary lines and descriptions |
+
+The minimum visible UI font size is `12px`. Do not use `10px` or `11px` for badges,
+pagination, table headers, helper text, nav labels, button labels, tags, or secondary
+metadata. If a component default renders smaller than `12px`, override it to `12px`.
+
 Do not scale font size with viewport width. Avoid hero typography on console pages.
 
 ### Language Consistency
 
 Use one UI language per generated page. If the consuming product context is Chinese, render
 navigation labels, selector subtitles, buttons, table headers, and pagination in Chinese. If
-the context is English, keep them in English. Do not mix English parent menu labels with
-Chinese child labels or vice versa unless the consuming product already has that exact
-mixed-language convention.
+the context is English, keep them in English. If the locale is not explicitly known, follow
+the main language of the user's prompt: English prompt -> English UI, Chinese prompt ->
+Chinese UI.
+
+Do not mix English parent menu labels with Chinese child labels or vice versa. Do not render
+bilingual duplicate labels such as `Deployments / 部署`, `Cluster 集群`, or `Create 创建`.
+
+For cloud-native resource names, use canonical KubeSphere/Kubernetes terminology:
+
+| Concept | English UI | Chinese UI |
+|---|---|---|
+| Cluster | `Cluster` / `Clusters` | `集群` |
+| Workspace | `Workspace` / `Workspaces` | `企业空间` |
+| Project | `Project` / `Projects` | `项目` |
+| Namespace | `Namespace` / `Namespaces` | `命名空间` when the Kubernetes namespace itself is meant; `项目` in KubeSphere project context |
+| Workload | `Workload` / `Workloads` | `工作负载` |
+| Deployment | `Deployment` / `Deployments` | `部署` |
+| StatefulSet | `StatefulSet` / `StatefulSets` | `有状态副本集` |
+| DaemonSet | `DaemonSet` / `DaemonSets` | `守护进程集` |
+| Job | `Job` / `Jobs` | `任务` |
+| CronJob | `CronJob` / `CronJobs` | `定时任务` |
+| Pod | `Pod` / `Pods` | `容器组` |
+| Service | `Service` / `Services` | `服务` |
+| Ingress | `Ingress` / `Ingresses` | `路由` or `Ingress` if the product context keeps the Kubernetes kind |
+| Gateway | `Gateway` / `Gateways` | `网关` |
+| ConfigMap | `ConfigMap` / `ConfigMaps` | `配置字典` |
+| Secret | `Secret` / `Secrets` | `保密字典` |
+| ServiceAccount | `ServiceAccount` / `ServiceAccounts` | `服务账户` |
+| Image | `Image` | `镜像` |
+| Created Time | `Created Time` | `创建时间` |
+| Updated Time | `Updated Time` | `更新时间` |
+| Custom Columns | `Custom Columns` | `自定义列` |
+
+If a technical term is uncertain, preserve the standard Kubernetes English kind instead of
+inventing a translation.
 
 ### Spacing And Shape
 
@@ -280,6 +319,24 @@ spacing. Cards should feel utilitarian, not editorial.
 
 ## Console Frame
 
+### Brand Logo Contract
+
+The KubeSphere logo is mandatory in the global top navigation.
+
+- Canonical logo URL:
+  `https://ks-com-cn-staging.pek3b.qingstor.com/images/logo.svg`.
+- Generated pages must render this as an image, for example
+  `<img src="https://ks-com-cn-staging.pek3b.qingstor.com/images/logo.svg" alt="KubeSphere" />`.
+- Do not generate a custom logo, draw an SVG mark, use an emoji/icon as the logo, or render
+  a text-only logo.
+- Do not use fake branding such as `LogoText Kube Sphere`, split words such as `Kube Sphere`,
+  placeholder image icons, or stock-looking marks.
+- A consuming project asset may replace the URL only when it is already the official
+  KubeSphere brand logo or the user explicitly asks to use that asset.
+- If the logo URL cannot load in an offline environment, keep the same image slot and
+  mention the load limitation in the final response; do not silently replace the logo with
+  invented branding.
+
 ### Baseline Measurements
 
 Use the live console at `1440 x 900` as the baseline frame for extracting layout
@@ -289,7 +346,7 @@ hierarchy.
 ```text
 viewport baseline        1440 x 900
 global header              64px
-header logo area          240px
+header logo area          224px
 live sidebar              220px
 live main area           1220px
 live page header           56px
@@ -306,17 +363,13 @@ The top navigation is mandatory on full console pages.
 
 - Height: `64px`.
 - Background: white.
-- Logo area: about `240px` wide on desktop.
-- Logo source: use the real KubeSphere platform logo. Prefer the official website/logo
-  source from `https://kubesphere.com.cn` or a consuming-app theme/config logo that already
-  points to the official asset. In the reference console, `Header` resolves the logo from
-  `globals.config.logo || globals.defaultTheme.logo`, or `globals.theme.logo` when a custom
-  theme is active. The default configured path is `/assets/logo.svg`, backed by
-  `packages/bootstrap/assets/logo.svg`.
+- Logo area: about `224px` wide on desktop.
+- Logo source: use the canonical logo URL from the Brand Logo Contract. The private console
+  resolves the logo from theme/config, but generated portable pages should use the canonical
+  URL unless the consuming app already exposes the official KubeSphere logo.
 - Logo layout: wrapper width about `224px`; linked logo box about `180px x 36px`; image uses
   `max-width: 100%`.
-- If no real asset exists, use a restrained `KubeSphere` text fallback only. Never use fake
-  branding such as `LogoText Kube Sphere`.
+- Text-only logo fallback is not acceptable for normal generated pages.
 - Product/module icon rail starts after the logo area.
 - Product icon target: `36px x 36px`, vertically centered at `y=14`.
 - Inactive product icons use pale `#f9fbfd` backgrounds.
@@ -326,6 +379,10 @@ The top navigation is mandatory on full console pages.
 - User block is compact: `32px-36px` high, `12px` text, bold username, muted role.
 
 Do not turn top navigation into a marketing header, breadcrumb-only bar, or dark app bar.
+
+Frame gate: a generated full console page is not visually acceptable if the top navigation
+is missing the official logo image, Cluster/Workspace management entries, Component Dock,
+or profile menu.
 
 #### Management View Entries
 
@@ -550,9 +607,17 @@ main
 - Internal padding: `10px 20px`.
 - Background: `#f9fbfd`.
 - Bottom separator: `1px` shadow/border in `#eff4f9`.
-- Left side: namespace/project selector when needed, then search.
+- Layout: left optional filters/selectors, center search channel, right fixed action group.
+- The center search channel must grow to fill available width.
+- Left side: namespace/project selector when needed.
 - Search input is compact, pale, and `32px` high.
-- Right side: refresh icon, settings icon, primary create button.
+- Right side order is fixed: refresh icon button, column settings icon button, then the
+  primary create/action button.
+- Refresh icon: use `Refresh` from `@kubed/icons`.
+- Column settings icon: use `Cogwheel` from `@kubed/icons`; it opens custom column
+  visibility controls. This is table settings, not Component Dock.
+- Icon buttons use text/ghost button styling, keep intrinsic `32px` control rhythm, and
+  have `12px` left spacing between the right-side actions.
 - Create button is dark, pill-like, `32px` high, at far right.
 - Avoid large multi-filter forms above the table unless the task requires advanced filtering.
 - Search and select controls should remain `32px` high. Do not use `40px+` dashboard-sized
@@ -582,6 +647,9 @@ Do not use a square white input with a strong border for the resource list searc
 
 ### Table
 
+- The table main wrapper is inset from the card: `margin: 0 12px 12px`.
+- Toolbar and footer remain attached to the same list surface; the table header/body sit
+  inside this `12px` left/right/bottom inset.
 - Header row: quiet, compact, muted labels.
 - Row height: about `56px-58px`.
 - A full resource list should show about 10 rows at `1440 x 900` when data exists.
@@ -604,6 +672,7 @@ Table CSS target:
 
 | Element | Target |
 |---|---|
+| Table main wrapper | `margin: 0 12px 12px` inside the list surface |
 | Table header background | `#ffffff`; do not use gray/blue filled header bands |
 | Header cell | `12px`, `600`, `#79879c`, padding `16px 12px`, mono/sans per kube-design table |
 | Body cell | `12px`, `400`, `#242e42`, padding `8px 12px` |
@@ -627,12 +696,15 @@ plain text-only first column makes the page look unlike the live console.
 - Right side: previous button, page index dropdown such as `1 / 5`, next button.
 - Previous/next are text buttons with `Previous` and `Next` icons at `20px`, not plain text.
 - Page index text: `12px`, `600`, `#36435c`, margin `0 12px`.
+- Keep the footer as real pagination controls. It should include page-size selection,
+  total count, and previous/next navigation even when mock data has only one page; disabled
+  buttons are acceptable.
 - Keep it small and quiet.
 - Footer background may use `#f9fbfd`; it should still feel attached to the same list
   surface.
 
-Do not render pagination as only `10 / page 1-10 of 10` text. That pattern does not match
-the live console table footer.
+Do not render pagination as only `10 / page 1-10 of 10`, `1-10 of 10`, or any plain text
+summary. That pattern does not match the live console table footer.
 
 ### Empty List
 
@@ -709,10 +781,13 @@ Reject and revise if any of these appear:
 
 - Dark left sidebar or dark global nav by default.
 - Generic admin template shell.
-- Fake branding such as `LogoText Kube Sphere`.
+- Missing official logo image.
+- Fake branding such as `LogoText Kube Sphere`, generated SVG marks, random app icons, or
+  text-only `KubeSphere` branding.
 - Top nav missing entirely on a full console page.
 - Missing persistent Cluster/Workspace management entries in the top nav.
 - Missing Component Dock before the profile menu.
+- Component Dock replaced by a gear/settings icon.
 - Sidebar missing scoped selector on scoped resource pages.
 - Scoped selector rendered as an oversized card with a large left icon, instead of a compact
   field-like switcher.
@@ -722,13 +797,20 @@ Reject and revise if any of these appear:
   explicitly requested.
 - Sidebar active state as dark filled row, thick left border, or large colored pill.
 - Sidebar icons from lucide, emoji, custom placeholder SVG, or random abstract icons.
+- Mixed Chinese and English labels in the same generated page.
+- Bilingual duplicate labels such as `Deployments / 部署`.
+- Fonts smaller than `12px` anywhere in the console UI.
 - Page title rendered as a hero.
 - Breadcrumb navigation on generated console pages unless the user explicitly requests it.
 - Toolbar/table/pagination split into separate cards.
+- Toolbar missing the fixed refresh action.
+- Toolbar missing the fixed Cogwheel/custom-column action.
 - Resource search rendered as a narrow fixed-width pill instead of filling the toolbar
   center channel.
 - Resource search rendered as a plain square white input instead of the FilterInput-style
   pale rounded control.
+- Table header/body touching the list surface edge instead of using `margin: 0 12px 12px`.
+- Pagination rendered as a plain text summary instead of an attached footer control.
 - Table stretched so wide that columns become sparse and hard to scan.
 - Only 4-5 rows shown on a full list page with available mock data.
 - Oversized filters and large form controls in the table toolbar.
@@ -743,9 +825,12 @@ Before considering a generated page visually acceptable:
   explicitly provided and requested them.
 - UI language is consistent across navigation, selectors, buttons, table headers, and
   pagination.
+- All visible UI text is at least `12px`.
 - CSS follows the consuming project's style approach and preserves the strict values in the
   CSS contract.
 - Global top nav is present and `64px` high.
+- The exact official logo URL is used unless an equivalent official project asset is
+  explicitly available.
 - Logo area, Cluster/Workspace management entries, and Component Dock match KubeSphere proportions.
 - Sidebar is light, `220px` by default, with scoped selector and resource tree.
 - Sidebar icons are from `@kubed/icons` and match resource semantics.
@@ -756,6 +841,10 @@ Before considering a generated page visually acceptable:
 - Content starts with `20px` padding on pale blue-gray workspace.
 - List page uses one dominant white list surface.
 - Toolbar is compact and integrated with the table.
+- Toolbar right side contains Refresh, Cogwheel/custom columns, then the dark create/action
+  button.
+- FilterInput-style search fills the center toolbar channel.
+- Table main wrapper is inset with `margin: 0 12px 12px`.
 - Table rows are dense, about `56px`, with realistic resource data.
 - Pagination is attached to the table surface.
 - Empty state follows the same list surface and density.
