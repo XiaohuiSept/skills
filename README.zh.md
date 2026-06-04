@@ -9,7 +9,7 @@
 ## 文件
 
 ```text
-agent/
+kubesphere-design/
   SKILL.md    Agent 执行流程、依赖策略、构建顺序和检查项
   DESIGN.md   KubeSphere 控制台视觉规范
 ```
@@ -18,10 +18,10 @@ agent/
 
 ## 快速使用
 
-把 `agent/` 目录提供给你的 agent，然后使用类似下面的 prompt：
+把 `kubesphere-design/` 目录提供给你的 agent，然后使用类似下面的 prompt：
 
 ```text
-Use agent/SKILL.md and agent/DESIGN.md.
+Use kubesphere-design/SKILL.md and kubesphere-design/DESIGN.md.
 Generate a KubeSphere-style resource list page with the full console frame.
 Use public @kubed/components and @kubed/icons when available.
 Do not depend on private KubeSphere console source code.
@@ -32,8 +32,8 @@ Do not depend on private KubeSphere console source code.
 ```bash
 git clone https://github.com/XiaohuiSept/skills.git
 mkdir -p ~/.codex/skills/kubesphere-design
-cp skills/agent/SKILL.md ~/.codex/skills/kubesphere-design/SKILL.md
-cp skills/agent/DESIGN.md ~/.codex/skills/kubesphere-design/DESIGN.md
+cp skills/kubesphere-design/SKILL.md ~/.codex/skills/kubesphere-design/SKILL.md
+cp skills/kubesphere-design/DESIGN.md ~/.codex/skills/kubesphere-design/DESIGN.md
 ```
 
 然后开启新的 Codex 会话，并要求它使用 `kubesphere-design` skill。
