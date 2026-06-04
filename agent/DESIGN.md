@@ -19,8 +19,8 @@ Use this file together with `SKILL.md`:
 
 Generated pages should look like KubeSphere Enterprise console pages, not generic admin
 templates. This document is the visual source of truth for downstream agents: it distills
-the live console appearance and `kse-console-kse` implementation patterns into portable
-rules that can be used with public `kube-design`.
+the live console appearance and product implementation patterns into portable rules that
+can be used with public `kube-design`.
 
 The product UI is light, compact, operational, and data-dense. It should feel calm and
 precise: white surfaces on pale blue-gray workspace chrome, small typography, compact
