@@ -31,9 +31,9 @@ Do not depend on private KubeSphere console source code.
 
 ```bash
 git clone https://github.com/XiaohuiSept/skills.git
-mkdir -p ~/.codex/skills/kube-design-agent
-cp skills/agent/SKILL.md ~/.codex/skills/kube-design-agent/SKILL.md
-cp skills/agent/DESIGN.md ~/.codex/skills/kube-design-agent/DESIGN.md
+mkdir -p ~/.codex/skills/kubesphere-design
+cp skills/agent/SKILL.md ~/.codex/skills/kubesphere-design/SKILL.md
+cp skills/agent/DESIGN.md ~/.codex/skills/kubesphere-design/DESIGN.md
 ```
 
-然后开启新的 Codex 会话，并要求它使用 `kube-design-agent` skill。
+然后开启新的 Codex 会话，并要求它使用 `kubesphere-design` skill。
