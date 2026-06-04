@@ -13,7 +13,7 @@ integrated toolbar/table/pagination, and KubeSphere-style resource identity cell
 ## Files
 
 ```text
-agent/
+kubesphere-design/
   SKILL.md    Agent workflow, dependency policy, build order, and verification
   DESIGN.md   Visual contract for the KubeSphere console style
 ```
@@ -23,10 +23,10 @@ the generated UI should look like.
 
 ## Quick Use
 
-Give your agent the `agent/` folder, then use a prompt like:
+Give your agent the `kubesphere-design/` folder, then use a prompt like:
 
 ```text
-Use agent/SKILL.md and agent/DESIGN.md.
+Use kubesphere-design/SKILL.md and kubesphere-design/DESIGN.md.
 Generate a KubeSphere-style resource list page with the full console frame.
 Use public @kubed/components and @kubed/icons when available.
 Do not depend on private KubeSphere console source code.
@@ -37,8 +37,8 @@ For Codex, you can also install it as a local skill:
 ```bash
 git clone https://github.com/XiaohuiSept/skills.git
 mkdir -p ~/.codex/skills/kubesphere-design
-cp skills/agent/SKILL.md ~/.codex/skills/kubesphere-design/SKILL.md
-cp skills/agent/DESIGN.md ~/.codex/skills/kubesphere-design/DESIGN.md
+cp skills/kubesphere-design/SKILL.md ~/.codex/skills/kubesphere-design/SKILL.md
+cp skills/kubesphere-design/DESIGN.md ~/.codex/skills/kubesphere-design/DESIGN.md
 ```
 
 Then start a new Codex session and ask it to use the `kubesphere-design` skill.
