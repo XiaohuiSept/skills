@@ -7,9 +7,10 @@ description: Design, build, or review high-fidelity KubeSphere Enterprise consol
 
 Generate KubeSphere Enterprise console-style pages with public `kube-design` primitives.
 
-Current priority: **high-fidelity basic resource list pages**. For detail pages, creation
-flows, dashboards, or advanced business workflows, keep the console frame accurate and say
-that this skill currently covers the list-page surface pattern first.
+Primary goal: generate KubeSphere Enterprise console-style UI with a recognizable product
+frame first. The resource list page pattern is the most complete reference pattern in this
+skill, but the same header, sidebar, page shell, language, typography, and object identity
+rules apply to other console management views.
 
 ## Core Contract
 
@@ -93,6 +94,25 @@ Before refining table data, verify:
 - Sidebar is light, `220px`, has the scoped selector, and uses semantic `@kubed/icons`.
 - Sidebar parent rows are `36px`, single-line, and child rows are text-only by default.
 - Page header has only the compact title band by default; no breadcrumb.
+
+## Output Correction Gate
+
+Before finalizing generated UI, inspect the first viewport and revise the output if any of
+these high-frequency failures appear. Do not explain them away as acceptable variations.
+
+| Failure | Required correction |
+|---|---|
+| Page title includes explanatory description text by default | Keep the page header compact: title only, no subtitle/help text unless explicitly requested |
+| UI labels mix Chinese and English, such as `容器组 (Pods)` | Use one locale only; Chinese UI uses Chinese product terms without English parentheses |
+| Primary create button is green | Use the dark command button for create/actions; reserve green for success/running/active states |
+| `Running` / `运行中` uses a gray or blue-gray status dot | Use the success green status dot |
+| Sidebar icons look like black solid blocks | Use semantic kube-design duotone icons with primary and secondary colors |
+| Active sidebar icon is only a green dot or random green mark | Active sidebar uses green text plus active duotone icon colors |
+| Resource identity icon is rendered inside a heavy bordered mini-card | Use a quiet `40px` semantic icon area; do not make each row icon look like a separate card |
+| Toolbar search looks like an isolated centered pill | Use the toolbar three-zone layout: left filters, center growing FilterInput, right actions |
+| Toolbar right actions are missing or reordered | Keep Refresh, Cogwheel/custom columns, then primary action |
+| Pagination is generic table footer text | Use attached pagination controls with page size, total count, previous/page/next |
+| Header/sidebar/list surface look acceptable individually but not like one product frame | Revise the shell first before refining row data |
 
 ## Runtime Baseline
 
@@ -229,6 +249,8 @@ For mock list pages, include 8-10 visible rows at desktop baseline. Minimum colu
 | Actions | overflow menu | Far right |
 
 Avoid placeholder rows such as `Item 1`, `Test`, `Foo`, or empty mock data.
+Do not add educational descriptions under page titles or table titles. Generated console
+pages are operational product screens, not documentation pages.
 
 Use one locale for all generated UI text. In English UI, keep Kubernetes resource names in
 their standard English form, such as `Deployment`, `Pod`, `Service`, `Ingress`, `Gateway`,
@@ -281,15 +303,23 @@ Always check:
 7. Parent sidebar labels remain single-line and `36px` high; child rows are text-only by
    default.
 8. No breadcrumb appears unless explicitly requested.
-9. List page uses one integrated toolbar/table/pagination surface.
-10. Search is FilterInput-style, `32px` high, and fills the toolbar center channel.
-11. Toolbar right side includes Refresh, Cogwheel/custom columns, then the dark primary action.
-12. Table main area is inset from the card with `0 12px 12px`.
-13. Resource name cells and resource list cards use the Object Identity Pattern: `40px`
+9. Page header is title-only by default; no explanatory subtitle or resource documentation
+   text unless the user explicitly asks.
+10. UI language is single-locale; no labels like `Pods / 容器组`, `容器组 (Pods)`, or
+    `Application Workloads` in a Chinese UI.
+11. Primary create/action button uses the dark command style, not green success styling.
+12. Running/success statuses use green dots; gray dots are only for waiting, unknown, or
+    neutral states.
+13. Resource identity icons are `40px` semantic icons, not heavy bordered mini-cards.
+14. List page uses one integrated toolbar/table/pagination surface.
+15. Search is FilterInput-style, `32px` high, and fills the toolbar center channel.
+16. Toolbar right side includes Refresh, Cogwheel/custom columns, then the dark primary action.
+17. Table main area is inset from the card with `0 12px 12px`.
+18. Resource name cells and resource list cards use the Object Identity Pattern: `40px`
     semantic icon, `12px` gap, bold primary title, regular muted description, ellipsis.
-14. Table header is white; rows are about `56px`; pagination is attached.
-15. Selected sidebar duotone icons use `--ks-icon-active` and `--ks-icon-active-fill`.
-16. UI text uses one locale and no font is smaller than `12px`.
+19. Table header is white; rows are about `56px`; pagination is attached.
+20. Selected sidebar duotone icons use `--ks-icon-active` and `--ks-icon-active-fill`.
+21. UI text uses one locale and no font is smaller than `12px`.
 
 ### Runtime Verification
 
