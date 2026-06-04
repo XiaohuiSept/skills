@@ -106,11 +106,15 @@ these high-frequency failures appear. Do not explain them away as acceptable var
 | UI labels mix Chinese and English, such as `容器组 (Pods)` | Use one locale only; Chinese UI uses Chinese product terms without English parentheses |
 | Primary create button is green | Use the dark command button for create/actions; reserve green for success/running/active states |
 | `Running` / `运行中` uses a gray or blue-gray status dot | Use the success green status dot |
-| Sidebar icons look like black solid blocks | Use semantic kube-design duotone icons with primary and secondary colors |
-| Active sidebar icon is only a green dot or random green mark | Active sidebar uses green text plus active duotone icon colors |
+| Sidebar icons look like black solid blocks | Use semantic `@kubed/icons` duotone components, not custom/lucide/monochrome icons |
+| Active sidebar icon is only a green dot, random mark, or single-color glyph | Active sidebar must pass both duotone channels: `color="#00aa72"` and `fill="#90e0c5"` |
 | Resource identity icon is rendered inside a heavy bordered mini-card | Use a quiet `40px` semantic icon area; do not make each row icon look like a separate card |
 | Toolbar search looks like an isolated centered pill | Use the toolbar three-zone layout: left filters, center growing FilterInput, right actions |
 | Toolbar right actions are missing or reordered | Keep Refresh, Cogwheel/custom columns, then primary action |
+| Toolbar refresh/settings icons appear as filled square tiles or bordered buttons | Use `Button variant="text"` icon triggers with transparent border/background at rest |
+| Table selected rows use a thick green left bar or custom blue fill | Use kube-design selected row behavior: pale cells plus thin `1px` green row outline |
+| Table resource icons are small custom diagrams, boxed avatars, or generic glyphs | Use semantic `@kubed/icons` at `40px` in the Object Identity Pattern |
+| Row overflow/more action is boxed, filled, or text-only | Use `More size={16}` inside a compact borderless `Button variant="text"` trigger |
 | Pagination is generic table footer text | Use attached pagination controls with page size, total count, previous/page/next |
 | Header/sidebar/list surface look acceptable individually but not like one product frame | Revise the shell first before refining row data |
 
@@ -192,7 +196,7 @@ When a private or consuming-app component is unavailable, decompose it:
 | List surface | local white wrapper containing toolbar, table, footer |
 | Identity cell | Object Identity Pattern: `40px` semantic icon + `12px` gap + two-line text |
 | Status cell | `StatusDot` plus text |
-| Action menu | `Dropdown` + `Menu` + `MenuItem` |
+| Action menu | `Dropdown` + `Menu` + `MenuItem`; trigger is `Button variant="text"` + `More size={16}` |
 
 Missing private components are not an excuse to switch to a generic SaaS/admin layout.
 
@@ -229,6 +233,11 @@ Use CSS custom properties from `DESIGN.md` as the strict numerical and color anc
 - Resource icons: use the semantic `@kubed/icons` component by Kubernetes kind or menu name.
   If the exact icon is missing, choose the closest semantic kube-design icon. Do not use
   lucide, emoji, or random hand-drawn placeholders for resource menus.
+- Duotone icon state: kube-design icons use the `color` prop for the primary path and the
+  `fill` prop for the secondary path. Inactive light-sidebar icons should preserve the
+  default duotone. Active sidebar icons must explicitly set both `color="#00aa72"` and
+  `fill="#90e0c5"`. Active top-nav icons on dark buttons must explicitly set light values
+  such as `color="rgba(255,255,255,0.9)"` and `fill="#ffffff66"`.
 - Component props: if docs/examples conflict with installed package types, adjust to the
   installed package.
 - High-level table/list components: if they cannot match the live-console density, compose a
@@ -282,7 +291,11 @@ Reject and revise if any of these appear:
 | Gray/blue filled table header | White table header |
 | Search is square, white, or narrow fixed-width | FilterInput-style search fills toolbar center |
 | Toolbar missing refresh or column settings | Fixed Refresh + Cogwheel actions before create |
+| Toolbar refresh/settings buttons have visible fill or border at rest | Borderless/backgroundless `Button variant="text"` icon buttons |
 | Table body touches the card edge | Table main inset uses `0 12px 12px` |
+| Table selected row uses thick left bar or strong custom fill | Pale selected cells with a thin green row outline |
+| Table icon uses a boxed avatar/custom mini diagram | Semantic `@kubed/icons` resource icon at `40px` |
+| Row more action is boxed or filled | `More size={16}` in a compact `Button variant="text"` trigger |
 | Pagination is plain text only | Attached footer with page-size, total count, and controls |
 | Only 4-5 rows on a full list page | About 8-10 visible rows when data exists |
 | Decorative gradients/glass/hero/dashboard composition | Compact operational resource list |
@@ -310,16 +323,25 @@ Always check:
 11. Primary create/action button uses the dark command style, not green success styling.
 12. Running/success statuses use green dots; gray dots are only for waiting, unknown, or
     neutral states.
-13. Resource identity icons are `40px` semantic icons, not heavy bordered mini-cards.
-14. List page uses one integrated toolbar/table/pagination surface.
-15. Search is FilterInput-style, `32px` high, and fills the toolbar center channel.
-16. Toolbar right side includes Refresh, Cogwheel/custom columns, then the dark primary action.
-17. Table main area is inset from the card with `0 12px 12px`.
-18. Resource name cells and resource list cards use the Object Identity Pattern: `40px`
+13. Sidebar and table icons use semantic `@kubed/icons`; no lucide/custom/monochrome
+    substitutes for product/resource icons.
+14. Active sidebar icons set both duotone channels: `color="#00aa72"` and `fill="#90e0c5"`.
+15. Resource identity icons are `40px` semantic icons, not heavy bordered mini-cards or
+    custom mini diagrams.
+16. List page uses one integrated toolbar/table/pagination surface.
+17. Search is FilterInput-style, `32px` high, and fills the toolbar center channel.
+18. Toolbar right side includes Refresh, Cogwheel/custom columns, then the dark primary action.
+19. Toolbar refresh and settings triggers are borderless/backgroundless
+    `Button variant="text"` icon buttons at rest; they are not filled square tiles.
+20. Table main area is inset from the card with `0 12px 12px`.
+21. Resource name cells and resource list cards use the Object Identity Pattern: `40px`
     semantic icon, `12px` gap, bold primary title, regular muted description, ellipsis.
-19. Table header is white; rows are about `56px`; pagination is attached.
-20. Selected sidebar duotone icons use `--ks-icon-active` and `--ks-icon-active-fill`.
-21. UI text uses one locale and no font is smaller than `12px`.
+22. Table header is white; rows are about `56px`; pagination is attached.
+23. Selected table rows follow kube-design behavior: pale cells plus a thin `1px` green row
+    outline; no thick left bar or strong custom selected fill.
+24. Row overflow actions use `More size={16}` inside a compact borderless
+    `Button variant="text"` trigger.
+25. UI text uses one locale and no font is smaller than `12px`.
 
 ### Runtime Verification
 
