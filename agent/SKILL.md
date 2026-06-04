@@ -1,6 +1,6 @@
 ---
 name: kubesphere-design
-description: Design, build, or review high-fidelity KubeSphere Enterprise console-style React interfaces using public kube-design primitives for Kubernetes and cloud-native management workflows..
+description: Design, build, or review high-fidelity KubeSphere Enterprise console-style React interfaces using public kube-design primitives for Kubernetes and cloud-native management workflows.
 ---
 
 # KubeSphere Design
