@@ -1,6 +1,6 @@
 # KubeSphere Design
 
-[English](README.md)
+[English](README.md) | 简体中文
 
 一套可移植的 AI Agent Skill，用于设计、生成和审查 KubeSphere Enterprise 控制台风格的 React 界面。
 
