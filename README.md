@@ -1,6 +1,6 @@
 # KubeSphere Design
 
-[简体中文](README.zh.md)
+English | [简体中文](README.zh.md)
 
 A portable AI-agent skill for designing, building, and reviewing React interfaces in the
 KubeSphere Enterprise console style.
