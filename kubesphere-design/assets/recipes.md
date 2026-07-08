@@ -64,9 +64,20 @@ does not clip.
 List toolbar order is fixed:
 
 ```text
-[left filters/selects] [growing FilterInput] [Refresh] [Cogwheel] [dark primary action]
+[left filters/selects] [growing FilterInput] [right actions: Refresh] [Cogwheel] [dark primary action]
 ```
 
+- Implement the toolbar as three sibling zones: left filters, center search, and right
+  actions. Recommended class hooks are `.ks-toolbar-left`, `.ks-toolbar-search`, and
+  `.ks-toolbar-actions`. Do not place Refresh, Cogwheel, or Create inside the FilterInput
+  wrapper or search zone.
+- The center search grows only inside `.ks-toolbar-search`; it must not overlay the Select
+  filter on the left or the action buttons on the right. Use `grid-template-columns: auto
+  minmax(0, 1fr) auto`, `min-width: 0` on the search zone, and `flex: 0 0 auto` /
+  `white-space: nowrap` on the actions zone.
+- The project Select should reserve a stable `148px x 32px` slot. Apply the size to both
+  `.ks-project-filter` and its `.kubed-select-selector`; keep the selector `box-sizing:
+  border-box`, full width, and vertically centered.
 - Search must use public kube-design `FilterInput` when exported. Use `simpleMode` for a
   plain keyword search field. Its product interaction is `32px` high, `18px` radius,
   `padding: 5px 40px`, search icon at `left: 12px`, hover border, and focused white
@@ -83,8 +94,13 @@ List toolbar order is fixed:
   the search placeholder or `.filter-input` class.
 - A local FilterInput-style wrapper is allowed only if the installed package does not export
   `FilterInput`; it must reproduce the hover/focus states above.
-- Search must flex through available toolbar space. Do not cap it with a narrow fixed
-  `max-width` such as `600px`.
+- Search must flex through available center-toolbar space. Do not cap it with a narrow
+  fixed `max-width` such as `600px`, but also do not let it span underneath or behind
+  Refresh, Cogwheel, or Create.
+- Do not give `.ks-filter-input` a positive fixed `min-width` such as `220px`. The search
+  zone already controls available space; the FilterInput itself should use `width: 100%`,
+  `min-width: 0`, and `max-width: none` so it can shrink without pushing into the Select or
+  action zones.
 - Project/resource filters use kube-design `Select` styling. Do not apply native select CSS
   (`appearance`, custom data-URI chevrons, `option` styling) to kube-design `Select`.
 - Toolbar `Select` filters should show the kube-design arrow. Pass `showArrow` when the
@@ -95,6 +111,9 @@ List toolbar order is fixed:
   `.kubed-select-arrow` visible, right-aligned, and above the selector text; do not cover
   it with selection search input width or custom overflow styles.
 - Refresh and Cogwheel are icon-only text buttons, borderless/backgroundless at rest.
+- Refresh and Cogwheel are always separate toolbar action buttons to the right of the
+  FilterInput. They must not be rendered as suffix icons, adornments, absolute-positioned
+  children, or visually embedded controls inside the search input.
 - Create/action button is dark, text-only by default, and must pass `shadow`.
 
 ## Table Recipe

@@ -32,6 +32,9 @@ small typography, status-rich tables, and attached pagination.
   dark text-only primary command. Refresh/Cogwheel are `32px` high text buttons with
   `0 20px` horizontal padding, not square icon buttons. The dark primary command must use
   kube-design `Button` with `shadow`; Refresh/Cogwheel must remain no-shadow text buttons.
+  The toolbar must be three sibling zones: left filters, center search, and right actions.
+  The search field grows only inside the center zone and must never overlap the Select
+  filter or visually contain Refresh/Cogwheel/Create.
 - Toolbar `Select` filters must show a visible kube-design dropdown chevron. Use
   `showArrow` and, when needed, explicit `suffixIcon={<ChevronDown size={16}
   color="#324558" fill="#b6c2cd" />}`; do not let padding or overlay styles hide the
@@ -103,7 +106,11 @@ small typography, status-rich tables, and attached pagination.
 | Treating `.kubed-select-selection-search-input` as the toolbar search input | Verify the real `FilterInput` input by placeholder or `.filter-input` |
 | Kube-design `Select` with native select CSS/data-URI chevron | Let kube-design `Select` render its control |
 | Toolbar `Select` has no visible arrow | `showArrow` plus explicit `ChevronDown` suffix when needed |
+| Select and search visually press into each other | Stable `148px x 32px` Select plus `12px` gap and `min-width: 0` search |
 | Search capped by narrow `max-width` | Search grows through the available toolbar space |
+| FilterInput has positive fixed `min-width` such as `220px` | `width: 100%; min-width: 0; max-width: none` inside search zone |
+| Search input overlaps Select or action buttons | Three sibling zones: filters, search, actions |
+| Refresh/Cogwheel rendered inside the search input | Separate right action buttons after FilterInput |
 | Table header with strong tinted fill | White table header with subtle divider |
 | Resource row without `40px` icon + text stack | Object Identity Pattern |
 | Gray tile/background behind table resource icon | Plain `40px` icon alignment slot |

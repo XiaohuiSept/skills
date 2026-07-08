@@ -8,8 +8,9 @@ status: active
 
 Toolbar is split into a separate card, search is a generic bordered input, Refresh/Cogwheel
 collapse into square icon-only tiles or become oversized, create is green or has a plus
-icon, create omits the kube-design button shadow, table body is flush to the card, and
-pagination uses numbered page buttons.
+icon, create omits the kube-design button shadow, the search field overlaps the Select or
+visually contains Refresh/Cogwheel, table body is flush to the card, and pagination uses
+numbered page buttons.
 
 ## Why It Fails
 
@@ -19,8 +20,11 @@ single compact operational system.
 ## Correct Pattern
 
 - Use the toolbar recipe from `assets/recipes.md`.
+- Structure toolbar as three sibling zones: filters, search, actions. FilterInput grows
+  only inside the search zone.
 - Keep Refresh and Cogwheel as `32px` high text buttons with `0 20px` horizontal padding
-  and a centered `16px` icon, even though the visible label is aria-only.
+  and a centered `16px` icon, even though the visible label is aria-only. They are separate
+  right action buttons, not input suffix icons.
 - Use a dark kube-design primary action with explicit `shadow`.
 - Keep table main inset `0 12px 12px`.
 - Use Object Identity Pattern in the first data column.
@@ -29,6 +33,7 @@ single compact operational system.
 ## Checklist
 
 - Search uses real kube-design `FilterInput` when exported and grows.
+- Search does not overlap Select, Refresh, Cogwheel, or Create.
 - Refresh and Cogwheel are borderless `32px` high text buttons with horizontal padding at
   rest.
 - Create is dark, text-only by default, and has explicit kube-design `shadow`.

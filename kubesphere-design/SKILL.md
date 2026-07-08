@@ -203,6 +203,8 @@ Fail and revise if any of these occur:
 - Expanded sidebar parent row remains inactive gray when one of its child items is active.
 - Toolbar is not left filters + growing FilterInput + Refresh + Cogwheel + dark text-only
   command.
+- Toolbar is built as one flat row where FilterInput can overlap Select or actions instead
+  of three sibling zones: filters, search, actions.
 - Dark primary create/action button omits explicit kube-design `shadow` prop.
 - Refresh/Cogwheel toolbar buttons collapse into square `32px x 32px` icon buttons instead
   of `32px` high text buttons with `0 20px` horizontal padding.
@@ -212,12 +214,16 @@ Fail and revise if any of these occur:
   `Button variant="text"`.
 - Toolbar search is hand-written as `label + input` even though public kube-design
   `FilterInput` is available.
+- Toolbar search visually contains Refresh/Cogwheel/Create, or Refresh/Cogwheel are
+  implemented as search suffix icons/adornments instead of separate right action buttons.
 - Kube-design `Select` is styled with native select CSS such as `appearance`, data-URI
   chevrons, or raw option styling.
 - Toolbar `Select` filter is missing the kube-design dropdown arrow or hides
   `.kubed-select-arrow`.
 - Toolbar `Select` arrow is covered by selector text/search input, lacks explicit fallback
   `ChevronDown` suffix when needed, or is not right-aligned.
+- Toolbar project Select root or `.kubed-select-selector` lacks a stable `148px x 32px`
+  box, causing the search field to visually press into or overlap the selector.
 - Table body is flush to the surface, lacks Object Identity Pattern, or uses wrong selected
   row styling.
 - Table body inset is `12px` on all sides instead of `0 12px 12px`.
@@ -245,6 +251,10 @@ Fail and revise if any of these occur:
 - The page adds status summary cards, language switchers, toast systems, delete modals, or
   column-setting modals when the prompt only asked for a basic resource list page.
 - Search input has a fixed narrow `max-width` that prevents it from filling the toolbar.
+- Search input grows outside the center search zone and overlaps the Select filter or
+  right action buttons.
+- `.ks-filter-input` has a positive fixed `min-width` such as `220px` instead of
+  `min-width: 0`, so it can force toolbar overlap.
 - FilterInput search text is bold or primary-colored instead of regular secondary text.
 - Verification treats `.kubed-select-selection-search-input` as the toolbar search field.
   That input belongs to `Select`; verify the real `FilterInput` by placeholder or
@@ -287,10 +297,16 @@ When the environment supports running the page, verify before finishing:
 - Sidebar scope selector has no leading icon and sidebar labels do not truncate unexpectedly.
 - Expanded parent sidebar row with an active child uses active brand text color.
 - Toolbar order is Select/filter, growing search, Refresh, Cogwheel, dark primary action.
+- Toolbar layout has three sibling zones: filters, search, actions. Search stays inside the
+  center zone; actions are not inside or underneath the FilterInput.
 - Toolbar Select filter shows the kube-design dropdown arrow.
 - Toolbar Select arrow remains visible after layout styling; use explicit `ChevronDown`
   suffix if package defaults do not render it.
+- Toolbar Select root and `.kubed-select-selector` are both stable `148px x 32px`; selector
+  uses `box-sizing: border-box` and does not collide with the search field.
 - Refresh/Cogwheel are `32px` high text buttons with `0 20px` horizontal padding.
+- Refresh/Cogwheel are separate right action buttons after the FilterInput, not search
+  suffix icons or input adornments.
 - Refresh/Cogwheel and row More are `32px` high text buttons with `0 20px` horizontal
   padding and no shadow; pagination arrows are `32px` high text buttons with `5px 12px`
   padding and `4px` radius.
@@ -300,6 +316,8 @@ When the environment supports running the page, verify before finishing:
   column width.
 - Row operation menu items, including Delete/删除, use normal menu text color.
 - FilterInput search text is regular weight and secondary color.
+- FilterInput wrapper is `32px` high, `width: 100%`, `min-width: 0`, `max-width: none`, and
+  stays inside `.ks-toolbar-search`.
 - When inspecting toolbar search, ignore kube-design `Select` internals such as
   `.kubed-select-selection-search-input`; verify the real `FilterInput` input by
   placeholder or `.filter-input`.
@@ -332,6 +350,8 @@ high-frequency omissions:
   and `shadow`.
 - Refresh, Cogwheel, row More, page-size, previous, and next controls are real kube-design
   `Button variant="text"` controls, not raw buttons.
+- Refresh/Cogwheel/Create are siblings of the search zone, not children of `.ks-filter-input`
+  or absolutely positioned inside the search field.
 - Refresh/Cogwheel/row More have no shadow; create/action has shadow.
 - Row menu `Delete` / `删除` is a normal `MenuItem` without danger/error text styling.
 - Page-size label, value, and chevron are separate children so CSS can align them with

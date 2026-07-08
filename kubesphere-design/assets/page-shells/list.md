@@ -260,19 +260,25 @@ function ListToolbar({ locale }: { locale: Locale }) {
 
   return (
     <div className="ks-list-toolbar">
-      <Select
-        className="ks-project-filter"
-        aria-label={text.project}
-        value="all"
-        showArrow
-        suffixIcon={<ChevronDown size={16} color="#324558" fill="#b6c2cd" />}
-      >
-        <Select.Option value="all">{text.allProjects}</Select.Option>
-      </Select>
-      <FilterInput className="ks-filter-input" simpleMode placeholder={text.searchPlaceholder} />
-      <Button className="ks-toolbar-icon-button" variant="text" aria-label={text.refresh}><Refresh size={16} /></Button>
-      <Button className="ks-toolbar-icon-button" variant="text" aria-label={text.tableSettings}><Cogwheel size={16} /></Button>
-      <Button className="ks-command-button" variant="filled" color="secondary" radius="xl" size="sm" shadow>{text.create}</Button>
+      <div className="ks-toolbar-left">
+        <Select
+          className="ks-project-filter"
+          aria-label={text.project}
+          value="all"
+          showArrow
+          suffixIcon={<ChevronDown size={16} color="#324558" fill="#b6c2cd" />}
+        >
+          <Select.Option value="all">{text.allProjects}</Select.Option>
+        </Select>
+      </div>
+      <div className="ks-toolbar-search">
+        <FilterInput className="ks-filter-input" simpleMode placeholder={text.searchPlaceholder} />
+      </div>
+      <div className="ks-toolbar-actions">
+        <Button className="ks-toolbar-icon-button" variant="text" aria-label={text.refresh}><Refresh size={16} /></Button>
+        <Button className="ks-toolbar-icon-button" variant="text" aria-label={text.tableSettings}><Cogwheel size={16} /></Button>
+        <Button className="ks-command-button" variant="filled" color="secondary" radius="xl" size="sm" shadow>{text.create}</Button>
+      </div>
     </div>
   );
 }
@@ -397,17 +403,21 @@ button, input, textarea, select { font: inherit; }
 .ks-page-header h1 { margin: 0; font-size: 18px; line-height: 24px; font-weight: 600; }
 .ks-content { padding: 20px; }
 .ks-list-surface { overflow: visible; background: #fff; border-radius: 4px; box-shadow: 0 2px 4px rgba(36, 46, 66, 0.04); }
-.ks-list-toolbar { height: 56px; display: grid; grid-template-columns: 148px minmax(280px, 1fr) auto auto auto; align-items: center; gap: 12px; padding: 10px 20px; background: var(--ks-subtle); border-bottom: 1px solid var(--ks-border); }
+.ks-list-toolbar { min-height: 56px; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 10px 20px; background: var(--ks-subtle); border-bottom: 1px solid var(--ks-border); box-sizing: border-box; overflow: visible; }
+.ks-toolbar-left, .ks-toolbar-search, .ks-toolbar-actions { min-width: 0; height: 32px; display: flex; align-items: center; }
+.ks-toolbar-left { flex: 0 0 auto; }
+.ks-toolbar-search { min-width: 0; overflow: visible; }
+.ks-toolbar-actions { flex: 0 0 auto; justify-content: flex-end; gap: 12px; white-space: nowrap; }
 .ks-project-filter, .ks-filter-input, .ks-command-button { height: 32px; font-size: 12px; }
-.ks-project-filter { min-width: 140px; width: 148px; }
-.ks-project-filter .kubed-select-selector { padding-right: 34px; }
+.ks-project-filter { width: 148px !important; min-width: 148px !important; max-width: 148px !important; flex: 0 0 148px; }
+.ks-project-filter .kubed-select-selector { width: 100%; height: 32px !important; min-height: 32px !important; box-sizing: border-box; display: flex; align-items: center; padding: 0 34px 0 12px; }
 .ks-project-filter .kubed-select-arrow { display: inline-flex !important; align-items: center; justify-content: center; right: 10px; opacity: 1 !important; visibility: visible !important; pointer-events: none; color: #324558; }
 .ks-project-filter .kubed-select-arrow svg { color: #324558; fill: #b6c2cd; }
 /* Let kube-design Select render its own border, chevron, and option styling. */
-.ks-filter-input { width: 100%; min-width: 220px; }
+.ks-filter-input { width: 100%; min-width: 0 !important; max-width: none; flex: 1 1 auto; height: 32px; max-height: 32px; box-sizing: border-box; }
 .ks-filter-input input.filter-input { color: var(--ks-muted) !important; font-weight: 400 !important; }
 .ks-filter-input input.filter-input::placeholder { color: var(--ks-muted) !important; opacity: 1; font-weight: 400 !important; }
-/* Use public kube-design FilterInput. Do not hand-write label + input when FilterInput is exported. Do not set a fixed narrow max-width on `.ks-filter-input`; it should grow through the toolbar. Do not target `.kubed-select-selection-search-input`; that belongs to Select. */
+/* Use public kube-design FilterInput. Do not hand-write label + input when FilterInput is exported. Do not set a fixed narrow max-width on `.ks-filter-input`; it should grow only inside `.ks-toolbar-search`. Do not target `.kubed-select-selection-search-input`; that belongs to Select. Refresh/Cogwheel/Create must remain outside `.ks-toolbar-search` and `.ks-filter-input`. */
 .ks-toolbar-icon-button { width: auto; min-width: 56px; height: 32px; min-height: 32px; max-height: 32px; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 16px; background: transparent; box-shadow: none; color: #36435c; padding: 0 20px; }
 .ks-toolbar-icon-button > * { width: auto; min-width: 16px; height: 32px; min-height: 32px; display: inline-flex; align-items: center; justify-content: center; padding: 0; }
 .ks-row-more { width: auto; min-width: 56px; height: 32px; min-height: 32px; max-height: 32px; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 16px; background: transparent; box-shadow: none; color: #36435c; padding: 0 20px; }

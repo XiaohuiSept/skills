@@ -12,7 +12,15 @@ separate cards. The pale workspace background should remain visible around the s
 
 - Background: `#f9fbfd`.
 - Padding: `10px 20px`.
-- Layout: left filters, center growing search, right actions.
+- Layout: three sibling zones: left filters, center growing search, and right actions.
+  Recommended hooks are `.ks-toolbar-left`, `.ks-toolbar-search`, and
+  `.ks-toolbar-actions`.
+- Use a stable layout such as `grid-template-columns: auto minmax(0, 1fr) auto`. The search
+  grows only inside the center zone; it must not overlap the Select filter or extend under
+  Refresh/Cogwheel/Create.
+- The project Select should occupy a stable `148px x 32px` slot. Set both the Select root
+  and `.kubed-select-selector` to the expected width/height and use `box-sizing:
+  border-box` so the search field does not visually press into the selector border.
 - Filter/select controls should use kube-design `Select` visual output. Do not apply native
   `select` CSS such as `appearance: none`, `background-image` chevrons, or raw option
   styling to a kube-design `Select`.
@@ -25,6 +33,12 @@ separate cards. The pale workspace background should remain visible around the s
 - Search uses public kube-design `FilterInput` when exported. For plain keyword search,
   use `simpleMode`. It should keep the component interaction: hover border, focused white
   background, subtle border, search icon at `left: 12px`, and `padding: 5px 40px`.
+- The `FilterInput` wrapper should be `32px` high and confined to the center search zone.
+  If it visually overlaps the Select filter or action buttons, the toolbar layout fails
+  even if the input itself looks polished.
+- Do not set a positive fixed `min-width` on `.ks-filter-input`; values such as `220px`
+  can force overlap at narrower content widths. Use `min-width: 0`, `width: 100%`, and
+  `max-width: none` on the FilterInput wrapper.
 - For the list toolbar search, the internal `.filter-input` should be regular and muted:
   `font-weight: 400`, `color: #79879c`, placeholder `#79879c`.
 - Kube-design component styles can win over low-specificity CSS. If the computed
@@ -39,6 +53,9 @@ separate cards. The pale workspace background should remain visible around the s
 - Right actions are fixed: Refresh, Cogwheel/custom columns, dark text-only primary action.
 - Refresh and Cogwheel are kube-design text buttons with icon only: `32px` high,
   `0 20px` horizontal padding, about `56px` effective width. They are not square buttons.
+- Refresh and Cogwheel must be sibling buttons in the right actions zone. Do not implement
+  them as search suffix icons, input adornments, absolutely positioned children inside the
+  FilterInput, or controls visually embedded at the right edge of the search field.
 - The dark primary action uses kube-design `Button` with `color="secondary"` and `shadow`.
   Do not rely on the default Button shadow value.
 
