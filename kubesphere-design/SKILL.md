@@ -1,282 +1,340 @@
 ---
 name: kubesphere-design
-description: Design, build, or review high-fidelity KubeSphere Enterprise console-style React interfaces using public kube-design primitives for Kubernetes and cloud-native management workflows.
+description: Design, build, or review high-fidelity KubeSphere Enterprise console-style React interfaces using modular KubeSphere design rules, page shells, recipes, and public kube-design primitives.
 ---
 
 # KubeSphere Design
 
-Generate high-fidelity KubeSphere Enterprise console-style React UI with public
-`@kubed/components`, semantic `@kubed/icons`, and portable local composition.
+Generate KubeSphere Enterprise console-style React UI with a recognizable product frame,
+semantic `@kubed/icons`, public `@kubed/components`, and local composition only for
+product shell pieces that kube-design does not export.
 
-This skill optimizes for one outcome: the generated page must be immediately recognizable
-as a KubeSphere Enterprise console page. The console frame comes first; resource content is
-judged only after the header, sidebar, page shell, list surface, table, and pagination pass
-the visual contract.
+This skill is optimized for fidelity over creativity. Do not produce a generic admin UI.
 
-## Three-File Contract
+## Public Package Rule
 
-Use all three files together:
+This skill is public and portable. Do not depend on private repositories, local screenshots,
+local filesystem paths, internal test projects, Figma links, live-console login details, or
+skill-development notes. Use only the rules and public package guidance contained in this
+skill folder plus public `@kubed/components` and `@kubed/icons`.
 
-| File | Role |
-|---|---|
-| `SKILL.md` | Agent workflow, dependency rules, build order, fallbacks, and verification |
-| `DESIGN.md` | Visual source of truth: dimensions, colors, typography, language, shell/list rules |
-| `IMPLEMENTATION.md` | Portable React/CSS blueprint for the shell, resource list, actions, and pagination |
+## Core Workflow
 
-Do not duplicate or invent competing visual values in generated code. If a visual value is
-needed, take it from `DESIGN.md`. If the consuming app has no equivalent console shell,
-start from `IMPLEMENTATION.md` and adapt it.
+1. Identify task type, locale, management view, resource type, and whether the page is a
+   basic list page.
+2. Read the files listed for that task in `Read By Task`, in order.
+3. Resolve resource title, active menu, icon, columns, actions, status labels, and mock data
+   from `assets/icon-map.md` and `assets/recipes.md` before inventing UI.
+4. Pass the Primitive Dependency Gate before writing page code.
+5. Build in frame-first order: Header -> Sidebar -> Page Header -> List Surface -> Toolbar
+   -> Table -> Pagination.
+6. Verify the frame before judging table details. If Header or Sidebar drifts, revise the
+   frame first.
+7. Verify imports, visible controls, language consistency, and public-package hygiene before
+   finishing.
 
-## Inputs And References
+## Acceptance Order
 
-Assume the user may only provide this skill folder and a consuming project with installed
-`@kubed/*` packages.
+Treat generation as a sequence of gates, not a loose checklist:
 
-Allowed:
+1. **Package gate**: imports include real `@kubed/components` and `@kubed/icons`, and the
+   app is wrapped in `KubedConfigProvider`.
+2. **Frame gate**: official logo, Header quick-nav, Component Dock, profile trigger,
+   Sidebar scope selector, and menu hierarchy match `references/console-frame.md`.
+3. **Icon gate**: mapped icons come from `assets/icon-map.md`; every forced duotone state
+   sets both `color` and `fill`.
+4. **List gate**: toolbar, table inset, object identity, row actions, selection, and
+   pagination match `assets/recipes.md`.
+5. **Language gate**: one locale only, with no bilingual duplicates and no text below
+   `12px`.
 
-- Read this `SKILL.md`, `DESIGN.md`, and `IMPLEMENTATION.md`.
-- Inspect the consuming project for existing imports, theme setup, shell components, and
-  build conventions.
-- Consult public `kubesphere/kube-design` upstream or package docs when internet access is
-  available.
+Do not consider a page acceptable because the central table looks polished. Header and
+Sidebar fidelity are higher priority than content decoration.
 
-Not allowed:
+## Read By Task
 
-- Requiring a local `kube-design` checkout.
-- Requiring, importing from, or depending on non-public repositories.
-- Replacing missing console shell components with a generic admin template.
+### Resource List Page
+
+| Priority | File | Purpose |
+|---|---|---|
+| MUST-READ | `DESIGN.md` | Overall KubeSphere visual contract |
+| MUST-READ | `assets/page-shells/list.md` | Copyable list page shell |
+| MUST-READ | `assets/tokens.md` | Color, size, spacing, and CSS variable truth |
+| MUST-READ | `assets/icon-map.md` | UI terms, resource keys, and icon mapping |
+| MUST-READ | `assets/recipes.md` | Resource, button, toolbar, table, status recipes |
+| MUST-READ | `references/console-frame.md` | Header/sidebar/frame fidelity rules |
+| MUST-READ | `references/components.md` | Required kube-design primitive usage |
+| IF-NEEDED | `references/list-pages.md` | List page detail and edge cases |
+| IF-NEEDED | `references/language.md` | Locale, terminology, and official glossary policy |
+| IF-NEEDED | `references/case-studies/*` | Use when reviewing or fixing repeated failures |
+
+### Page Review Or Visual Fix
+
+Read `DESIGN.md`, `assets/tokens.md`, `assets/icon-map.md`, `assets/recipes.md`, and the
+case study matching the failure. If the issue is frame-level, also read
+`references/console-frame.md`; if it is table/list-level, read `references/list-pages.md`.
 
 ## Conflict Resolution
 
-Use this matrix when sources disagree:
-
 | Decision area | Priority |
 |---|---|
-| User intent | Explicit user instruction wins unless it breaks the build or task |
-| KubeSphere UI rules | `DESIGN.md`/`IMPLEMENTATION.md` rules > screenshots > generic kube-design docs |
-| Component API/imports | Consuming project usage > installed package build/types > public upstream docs |
-| Visual appearance | `DESIGN.md` wins for the portable visual contract |
-| Portable structure | `IMPLEMENTATION.md` wins when no equivalent project shell/list component exists |
-| Workflow/validation | This `SKILL.md` wins for reading order, fallbacks, gates, and verification |
+| User intent | Explicit user instruction wins unless it breaks the task |
+| Visual contract | `DESIGN.md` and `assets/tokens.md` win |
+| Shell structure | `assets/page-shells/*` wins |
+| Icons and terms | `assets/icon-map.md` wins |
+| Component/resource choices | `assets/recipes.md` wins |
+| Explanation and edge cases | `references/*` wins |
+| Component API correctness | Consuming project imports/types > public kube-design docs > local fallback |
 
-If an exact API is uncertain, preserve the visual pattern in `DESIGN.md` first, choose the
-closest available public primitive, then correct imports with TypeScript/build feedback.
+If a public component API differs from these examples, keep the visual role and adapt to the
+installed API. Do not replace missing shell components with a generic admin template.
 
-## Required Reading Order
+## Primitive Dependency Gate
 
-1. Read this file.
-2. Read `DESIGN.md`, especially `Critical Visual Contract`.
-3. For any build or substantial UI edit, read `IMPLEMENTATION.md`.
-4. Inspect the consuming project for existing `@kubed/*` usage, locale setup, and shell/list
-   components.
-5. Generate or edit the page using project APIs plus local composition where needed.
-6. Verify the first viewport against `DESIGN.md` and the gates below.
+KubeSphere fidelity depends on real kube-design primitives. For a new React project, install
+or import public kube-design packages before generating the page:
 
-## Build Order
+```text
+@kubed/components
+@kubed/icons
+```
 
-Do not begin with a standalone table. Build and verify in this order:
+When using `@kubed/components`, wrap the React root in the package provider before rendering
+KubeSphere UI. For a standalone Chinese page, use
+`<KubedConfigProvider locale="zh" themeType="light">`; for English, use `locale="en"`.
+Missing the provider can make kube-design controls render incorrectly or crash at runtime.
+Install any public peer dependencies required by the selected package version, especially
+theme/runtime dependencies such as `styled-components`.
 
-| Step | Piece | Rule |
-|---:|---|---|
-| 1 | `ConsoleHeader` | Real logo, management entries, Component Dock, profile |
-| 2 | Active management view | Cluster/Workspace state and matching scoped selector |
-| 3 | `ResourceSidebar` | Light sidebar, semantic duotone icons, nested nav |
-| 4 | `PageHeader` | Compact title band, no breadcrumb by default |
-| 5 | `ListSurface` | One integrated toolbar + table + pagination surface |
-| 6 | Toolbar | Left filters, growing FilterInput, Refresh, Cogwheel, dark action |
-| 7 | Table | Inset table, object identity cells, status, row actions, selection |
-| 8 | Pagination | Attached kube-design-style footer |
-| 9 | States | Empty/loading/error states using the same frame |
+If the consuming project already has equivalent public kube-design imports, reuse them. If
+the packages are unavailable and cannot be installed, stop and clearly state that the result
+will be an approximation instead of silently hand-writing replacements.
 
-Header and sidebar must pass before table details are considered acceptable.
+Installing kube-design packages is not enough. A resource list page must actually use
+`@kubed/components` for visible controls:
 
-## Fidelity Gates
+- `Button` for toolbar actions, command buttons, row more triggers, and pagination icon
+  actions.
+- `Checkbox` for table header and row selection.
+- `Dropdown`, `Menu`, and `MenuItem` for row action menus.
+- `Select` for project/filter selects when exported by the installed package.
+- `FilterInput` when exported for toolbar search. Use `simpleMode` for plain keyword
+  search. A local FilterInput-style wrapper is allowed only when the installed package does
+  not export `FilterInput`.
 
-### Frame Gate
+If final page code imports only `@kubed/icons` and implements controls with raw
+`button`, `select`, custom checkbox CSS, or custom dropdown state, it fails this gate.
 
-Fail and revise the output if any of these are missing:
+Never create local substitutes for these primitives:
 
-- Real KubeSphere logo from `DESIGN.md`; no fake logo, text logo, generated mark, or random
-  icon.
-- `64px` white top header with `224px` brand area.
-- Cluster and Workspace management entries as icon-only `36px` controls when both views are
-  in scope.
-- Active top entry: dark selected icon button plus `28px x 4px` bottom indicator.
-- Inactive top Workspace/Cluster icons preserve duotone color and fill; do not set only one
-  muted `color` prop.
-- Component Dock before profile, labeled `组件坞` or `Component Dock`, not a gear/settings
-  substitute.
-- Profile menu with avatar, username, role/subtitle, and chevron.
-- White `220px` sidebar with scoped selector and resource navigation; never a dark sidebar.
-- Compact page header with title only and no breadcrumb by default.
+- `src/icons.tsx` or hand-drawn SVG copies of KubeSphere resource/navigation icons.
+- `src/components.tsx` clones of `Button`, `Checkbox`, `Dropdown`, `Menu`, or `MenuItem`.
+- Native-control clones for list controls, such as CSS-only checkboxes, raw select styling,
+  or custom dropdown/menu popovers.
+- CSS-only icon masks, emoji icons, lucide/react-icons/shadcn icons, or generic admin icon
+  sets for mapped KubeSphere terms.
 
-### Navigation/Icon Gate
+Local composition is allowed only for product shell roles that kube-design does not provide:
+`ConsoleHeader`, `ResourceSidebar`, `PageHeader`, `ListSurface`, `ResourceIdentityCell`,
+`StatusCell`, and pagination layout wrappers. These wrappers must still use public
+`@kubed/components` and `@kubed/icons` inside them.
 
-Fail and revise if:
+Header quick-nav entries, the Component Dock trigger, profile trigger, scope selector, and
+sidebar menu rows are product shell controls. If no public kube-design component exports
+that exact product shell behavior, compose them locally using semantic `@kubed/icons` and
+the dimensions in `DESIGN.md`; do not replace them with generic admin widgets.
 
-- Sidebar icons are lucide icons, emoji, masks, custom black blocks, or single-color glyphs.
-- Navigation/resource icons ignore the fixed icon map in `DESIGN.md`. Use that map for
-  listed Chinese/English labels before guessing by name.
-- Sidebar icons do not use semantic `@kubed/icons` names that match the menu/resource when
-  the label is not in the fixed map.
-- Active sidebar icon does not set both duotone channels:
-  `color="#00aa72"` and `fill="#90e0c5"`.
-- Active top icon on a dark button does not use the light duotone values from `DESIGN.md`.
-- The scoped selector icon uses active green by default on a light selector background.
-  Scope selector icons should normally use default dark duotone.
-- Component Dock icon is hand-drawn with CSS squares or replaced by Cogwheel/settings. Use
-  `Grid2Duotone`.
-- Child menu rows show icons by default; child rows should be text-only unless an existing
-  project shell proves otherwise.
+## CSS Strategy
 
-### List Gate
+Before writing styles, inspect the consuming project styling conventions.
 
-Fail and revise if:
-
-- Toolbar, table, and pagination are separate cards instead of one integrated surface.
-- Search is a generic bordered input or isolated centered pill instead of the FilterInput
-  shape from `DESIGN.md`.
-- Toolbar right actions are missing, reordered, boxed, or filled. They must be Refresh,
-  Cogwheel/custom columns, then dark primary action; icon actions are borderless text/icon
-  triggers at rest.
-- Toolbar icon actions are not implemented with kube-design text buttons when
-  `Button` is available. Prefer the table toolbar pattern:
-  `<Button variant="text" className="btn-refresh"><Refresh /></Button>` and the same
-  pattern for Cogwheel/settings.
-- Primary create/action button is green. It must be the dark command button.
-- Create/action button shows an unnecessary leading plus icon. The default list toolbar
-  create button is text-only unless the user or existing project shell requires an icon.
-- Table body is flush to the surface. It must keep the `DESIGN.md` table inset.
-- First data column does not use the Object Identity Pattern: `40px` semantic icon, `12px`
-  gap, bold primary text, muted secondary text.
-- First data column uses active green resource icons for every row. Table identity icons
-  should normally use default dark duotone inside the `40px` icon area, not active sidebar
-  colors.
-- Status dots use gray/blue for running. Running/success uses green.
-- Selected rows use thick green bars, mint fills, or blue fills. Use the thin-outline pale
-  selection style from `DESIGN.md`.
-- Row more actions are boxed/filled/text-only. Use compact borderless `More size={16}`.
-- Pagination is generic numbered pages or plain footer text instead of the attached
-  kube-design-style page-size/total/previous/current/next layout.
-
-### Language And Type Gate
-
-Fail and revise if:
-
-- UI labels mix Chinese and English or render bilingual duplicates such as `容器组 (Pods)`.
-- Cloud-native terms are invented or loosely translated. Use `DESIGN.md` terminology.
-- Any visible text is below `12px`.
-- List page titles are oversized. Use the compact title sizing from `DESIGN.md`.
-
-## Implementation Strategy
-
-Use project components only when they already match the visual contract. Otherwise compose
-locally from public primitives.
-
-Do not assume these console-level components exist unless the consuming project already
-imports them: `TopNav`, `SideNav`, `ConsoleShell`, `ResourceSidebar`, `ListPage`,
-`DataTable`, `NavMenu`, `NavSwitcher`, `useActionMenu`.
-
-When unavailable, use the portable roles from `IMPLEMENTATION.md`:
-
-| Console role | Portable construction |
-|---|---|
-| Header | Local header + real logo + flex layout + kube-design icons/dropdowns |
-| Management entries | `Cluster` and `Workspace` icons; active dark button and light icon |
-| Component Dock | Local labeled pill using `Grid2Duotone` |
-| Sidebar | Local light `aside/nav`, scoped selector, semantic resource icons |
-| Page header | Local white title band |
-| List surface | Local white wrapper containing toolbar, table, footer |
-| Row actions | `Dropdown` + `Menu` + `MenuItem` with borderless `More` trigger |
-
-Use these button roles when `@kubed/components/Button` is available. The visual role comes
-first; the exact props are the public implementation path for that role.
-
-| Role | Required kube-design button |
-|---|---|
-| Primary | `<Button variant="filled" color="secondary" radius="xl" size="sm">` |
-| Secondary | `<Button variant="filled" color="default" radius="xl" size="sm">` |
-| Toolbar icon | `<Button variant="text">` with table toolbar classes |
-| Row more | `<Button variant="text" radius="lg">` with `<More size={16} />` |
-| Pagination icon | `<Button variant="text" radius="sm">` with `<Previous/Next size={20} />` |
-| Dangerous | `<Button variant="filled" color="error" radius="xl" size="sm">` |
-
-Text action buttons are generally `32px` high with pill radius and about `0 20px`
-horizontal padding. Icon button radius varies by context (`sm`, `lg`, or unstyled text
-button classes); do not force every icon button to `xl`. If `Button` is
-unavailable or its installed API differs, adapt to the closest supported public API. Use a
-local native button only as a fallback, and match the same role semantics.
-
-## Adaptation Rules
-
-Start from `IMPLEMENTATION.md` and adapt only what the requested resource requires:
-
-- Resource kind, active menu key, title, and locale labels.
-- Resource-specific icon from the fixed icon map in `DESIGN.md`; if absent, choose the
-  closest semantic `@kubed/icons` component by name.
-- One primary identity column plus one to three resource-specific columns.
-- Mock data values and statuses.
-- Imports required by the installed package version.
-
-Keep these stable unless the user explicitly asks otherwise: header hierarchy, sidebar
-hierarchy, scoped selector, page header, toolbar zones, table inset, object identity cell,
-selected row behavior, row action trigger, and pagination structure.
-
-## Data And Locale
-
-Use realistic Kubernetes/cloud-native mock data: 8-10 visible rows, mixed statuses, real
-resource-like names, namespaces/projects, timestamps, and one or two resource-specific
-columns.
-
-Minimum table pattern:
-
-| Column | Requirement |
-|---|---|
-| Selection | Checkbox column |
-| Name | Object Identity Pattern with semantic icon |
-| Status | Status dot + localized text |
-| Scope | Namespace/project/workspace/cluster as relevant |
-| Specifics | 1-3 columns such as image, pods, type, ports, replicas |
-| Time | Muted created/updated time |
-| Actions | Borderless `More` dropdown |
-
-Locale follows the user prompt or project locale. English UI keeps standard Kubernetes
-resource names. Chinese UI uses established KubeSphere/Kubernetes terms from `DESIGN.md`.
-If unsure, keep the Kubernetes original term instead of inventing a translation.
+1. Prefer the existing project pattern: Emotion/styled-components, CSS Modules, global CSS,
+   or project-local style helpers.
+2. Use `assets/tokens.md` values and CSS variable names as the visual source of truth.
+3. Avoid inline `<style>{...}</style>` blocks in React output unless the target environment
+   has no practical stylesheet path.
+4. Use `!important` sparingly, only to correct public kube-design control outer dimensions,
+   padding, background, or shadow when component styles otherwise override the product
+   contract. Do not use it to rewrite component internals, create a new theme, or hide
+   layout mistakes.
+5. Use the font stack in `assets/tokens.md` for shell CSS and custom text. Do not put
+   `Inter`, `Geist`, or generic `system-ui` before the kube-design/KubeSphere font stack.
+6. Do not create a competing color palette or viewport-scaled typography.
 
 ## Fallback Strategy
 
-For detail pages, creation flows, dashboards, or other views not fully covered yet:
+- Icons: use `assets/icon-map.md`; if absent, choose the closest semantic `@kubed/icons`
+  component by exact resource/menu name. Do not use lucide, emoji, CSS masks, or handmade
+  black blocks for KubeSphere resource/navigation icons.
+- Components: use installed `@kubed/components` APIs first. If a prop differs, adapt while
+  preserving the role in `assets/recipes.md`.
+- Shell: if the project lacks Header/Sidebar/DataTable components, compose locally from the
+  list page shell, but do not clone kube-design primitives.
+- Build errors: fix imports and prop names first; do not change the visual contract to make
+  compilation easier.
 
-- Still use the same header, sidebar, scoped selector, page header, typography, and locale
-  contract.
-- Reuse list-page primitives where they fit.
-- Prefer conservative KubeSphere-style local composition over generic admin UI.
-- Mention in the response that the reusable list pattern is the strongest covered pattern
-  if the requested view goes beyond it.
+## Fidelity Gates
 
-## Verification
+Fail and revise if any of these occur:
 
-### Static Verification
+- Fake/text logo, missing KubeSphere logo, or random brand icon.
+- Dark sidebar, generic admin navigation, visible breadcrumbs by default.
+- Missing Cluster/Workspace top management entries when the full console frame is in scope.
+- Inactive top Workspace/Cluster icons render as black silhouettes or transparent-fill
+  glyphs instead of a light circular quick-nav control with default/dark icon variant.
+- Inactive top management icons omit explicit `color="#36435c"` and `fill="#b6c2cd"`.
+- Active top management icons omit both light channels: `color="rgba(255,255,255,0.9)"`
+  and `fill="#ffffff66"`.
+- Component Dock replaced by settings/Cogwheel or CSS grid squares.
+- Component Dock is restyled into a custom bordered chip instead of the no-border light
+  pill product shape.
+- Component Dock `Grid2Duotone` omits explicit default duotone channels
+  `color="#324558"` and `fill="#b6c2cd"`.
+- Profile menu is rendered as an oversized gray/bordered pill rather than a compact
+  transparent account trigger.
+- Profile trigger lacks the compact product structure: `32px` avatar, `12px` gap,
+  username/role text stack, and chevron. Prefer `.ks-profile-trigger` for generated shell
+  code.
+- Sidebar/resource icons ignore the fixed icon map or use single-color glyphs.
+- Active sidebar duotone icons do not set both `color="#00aa72"` and `fill="#90e0c5"`.
+- Scope selector has a leading Cluster/Workspace icon, a black/green-only glyph, or looks
+  like an active nav item.
+- Expanded sidebar parent rows use strong outlined/pill styling instead of quiet light rows.
+- Expanded sidebar parent row remains inactive gray when one of its child items is active.
+- Toolbar is not left filters + growing FilterInput + Refresh + Cogwheel + dark text-only
+  command.
+- Dark primary create/action button omits explicit kube-design `shadow` prop.
+- Refresh/Cogwheel toolbar buttons collapse into square `32px x 32px` icon buttons instead
+  of `32px` high text buttons with `0 20px` horizontal padding.
+- Refresh/Cogwheel toolbar buttons or row More buttons use command-button shadow instead of
+  no-shadow `variant="text"` styling.
+- Refresh/Cogwheel use raw `button` elements or custom icon wrappers instead of kube-design
+  `Button variant="text"`.
+- Toolbar search is hand-written as `label + input` even though public kube-design
+  `FilterInput` is available.
+- Kube-design `Select` is styled with native select CSS such as `appearance`, data-URI
+  chevrons, or raw option styling.
+- Toolbar `Select` filter is missing the kube-design dropdown arrow or hides
+  `.kubed-select-arrow`.
+- Toolbar `Select` arrow is covered by selector text/search input, lacks explicit fallback
+  `ChevronDown` suffix when needed, or is not right-aligned.
+- Table body is flush to the surface, lacks Object Identity Pattern, or uses wrong selected
+  row styling.
+- Table body inset is `12px` on all sides instead of `0 12px 12px`.
+- Table resource icons have added gray tile/card backgrounds.
+- Status labels beside status dots are muted or regular weight instead of semibold primary
+  text.
+- Row `More` action is clipped, overlapped, or pushed against the table edge.
+- Row `More` action is compressed into a square `32px x 32px` icon button instead of a
+  `32px` high text button with `0 20px` horizontal padding.
+- Row `More` action cell removes the normal `0 12px` table cell padding or uses less than
+  about `80px` column width.
+- Table row operation menu uses error/danger text color for Delete/删除 instead of normal
+  menu text color.
+- Pagination uses numbered page buttons instead of the attached KubeSphere layout.
+- Pagination page-size or previous/next controls use pill radius instead of `4px` radius.
+- Pagination page-size label, value, and chevron are glued together, vertically offset, or
+  not aligned through the kube-design Button inner wrappers.
+- Pagination previous/next buttons are clipped, flush against the right edge, or hidden by
+  list-surface overflow.
+- UI labels mix Chinese and English or any visible text is below `12px`.
+- Shell/custom text uses an AI-template font stack such as `Inter`, `Geist`, or
+  `system-ui` before the kube-design/KubeSphere font stack.
+- A normal list page includes a runtime language switcher. Choose one locale from the prompt
+  and render only that locale.
+- The page adds status summary cards, language switchers, toast systems, delete modals, or
+  column-setting modals when the prompt only asked for a basic resource list page.
+- Search input has a fixed narrow `max-width` that prevents it from filling the toolbar.
+- FilterInput search text is bold or primary-colored instead of regular secondary text.
+- Verification treats `.kubed-select-selection-search-input` as the toolbar search field.
+  That input belongs to `Select`; verify the real `FilterInput` by placeholder or
+  `.filter-input`.
+- The page installs `@kubed/components` but uses raw HTML controls for toolbar, table
+  selection, row actions, or pagination.
+- The page uses `@kubed/components` without a root `KubedConfigProvider`.
+- The generated project contains private paths, local test names, screenshots, internal
+  repository names, credentials, process notes, or evaluation prompts.
 
-Always check:
+## Generation Rule
 
-1. `DESIGN.md` logo URL is used for the header logo.
-2. No fake logo, dark sidebar, breadcrumbs by default, bilingual duplicate labels, or text
-   under `12px`.
-3. Header and sidebar pass the Frame Gate.
-4. Active/sidebar icons pass the duotone channel rules.
-5. Toolbar, table inset, selection, row actions, and pagination pass the List Gate.
-6. Public imports compile against the consuming project's installed packages.
+For resource list pages, select a resource recipe before generating code. The resource
+recipe determines page title, active menu, icon, columns, mock data shape, and localized
+labels. Do not copy Deployments columns into Pods, Services, Ingresses, or Gateway pages
+unless the recipe says so.
 
-### Runtime Verification
+For Phase 1 list pages, keep behavior intentionally narrow: shell, toolbar, table, row
+actions, and pagination. Do not add dashboards, stat cards, locale toggles, notifications,
+modal workflows, animated loading states, or column-management UI unless the user explicitly
+requests them.
 
-When the environment supports it:
+For detail pages, create flows, dashboards, or other unsupported page types, preserve the
+same Header, Sidebar, Page Header, typography, language, icon, and button contracts. Keep
+the non-list content conservative and state any unsupported pattern as an approximation
+instead of inventing a new console style.
 
-1. Run typecheck/build/lint commands used by the project.
-2. Inspect at `1440x900` and `1920x1080`.
-3. Confirm the search control grows across the toolbar, sidebar labels do not wrap, table
-   density is stable, selected rows match `DESIGN.md`, and the first viewport reads as one
-   KubeSphere console frame.
+## Runtime Verification Checklist
 
-Do not finish by saying a generic page is "close enough" if any fidelity gate fails.
+When the environment supports running the page, verify before finishing:
+
+- Build/typecheck passes.
+- Browser opens the page and `#root` contains the console UI.
+- No current console errors after reload.
+- Official logo image is present.
+- Header is `64px` high and Sidebar is `220px` wide on desktop.
+- Header quick-nav icons use the correct active/inactive duotone colors.
+- Inactive Workspace icon is measured visually as a two-channel duotone icon, not a black
+  glyph.
+- Sidebar scope selector has no leading icon and sidebar labels do not truncate unexpectedly.
+- Expanded parent sidebar row with an active child uses active brand text color.
+- Toolbar order is Select/filter, growing search, Refresh, Cogwheel, dark primary action.
+- Toolbar Select filter shows the kube-design dropdown arrow.
+- Toolbar Select arrow remains visible after layout styling; use explicit `ChevronDown`
+  suffix if package defaults do not render it.
+- Refresh/Cogwheel are `32px` high text buttons with `0 20px` horizontal padding.
+- Refresh/Cogwheel and row More are `32px` high text buttons with `0 20px` horizontal
+  padding and no shadow; pagination arrows are `32px` high text buttons with `5px 12px`
+  padding and `4px` radius.
+- Dark create/action button uses `Button variant="filled" color="secondary" radius="xl"
+  size="sm" shadow`, and computed `box-shadow` is not `none`.
+- Row More action cell keeps `0 12px` horizontal cell padding and at least about `80px`
+  column width.
+- Row operation menu items, including Delete/删除, use normal menu text color.
+- FilterInput search text is regular weight and secondary color.
+- When inspecting toolbar search, ignore kube-design `Select` internals such as
+  `.kubed-select-selection-search-input`; verify the real `FilterInput` input by
+  placeholder or `.filter-input`.
+- Table has `8-10` visible rows by default unless the user asked for fewer.
+- Pagination is attached and uses page-size, total, previous, `1 / N`, next.
+- Pagination page-size and previous/next controls use `4px` radius, and the rightmost
+  button is fully visible with no clipping.
+- Pagination page-size Button splits label/value/icon into separate children; computed
+  inner label wrapper is inline-flex/center with about `4px` gap.
+- UI uses one locale only and no visible text is smaller than `12px`.
+- Body and `.ks-console` computed font family follows the kube-design/KubeSphere stack, not
+  `Inter` or `Geist` first.
+
+## Visible Control Rule
+
+For a buildable React page, inspect the final source before finishing. A basic list page
+should include imports from both `@kubed/icons` and `@kubed/components`. Raw semantic
+elements are acceptable for product shell wrappers such as `header`, `aside`, `main`, and
+simple navigation rows, but not for kube-design control roles. Toolbar buttons, command
+buttons, selection checkboxes, row action menus, and pagination icon actions must use
+kube-design components.
+
+## Generated Code Self-Check
+
+Before finishing a generated or repaired list page, inspect the final source for these
+high-frequency omissions:
+
+- `KubedConfigProvider` wraps the app.
+- The primary create/action button is a real kube-design `Button` with `color="secondary"`
+  and `shadow`.
+- Refresh, Cogwheel, row More, page-size, previous, and next controls are real kube-design
+  `Button variant="text"` controls, not raw buttons.
+- Refresh/Cogwheel/row More have no shadow; create/action has shadow.
+- Row menu `Delete` / `删除` is a normal `MenuItem` without danger/error text styling.
+- Page-size label, value, and chevron are separate children so CSS can align them with
+  `4px` inner gap.
+- No local `icons.tsx`, local primitive clone, private path, test-project path, screenshot
+  reference, or process note remains in the output.
