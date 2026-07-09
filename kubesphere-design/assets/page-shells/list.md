@@ -20,8 +20,8 @@ Forbidden substitutions:
 ## Imports And Configuration
 
 ```tsx
-import type { ReactNode } from 'react';
-import { Button, Checkbox, Dropdown, FilterInput, KubedConfigProvider, Menu, MenuItem, Select } from '@kubed/components';
+import { useState, type ReactNode } from 'react';
+import { Button, Checkbox, Dropdown, FilterInput, KubedConfigProvider, Menu, MenuItem, MenuLabel, Select } from '@kubed/components';
 import {
   Appcenter,
   Backup,
@@ -29,6 +29,8 @@ import {
   Cluster,
   Cogwheel,
   Grid2Duotone,
+  Eye,
+  EyeClosed,
   More,
   Next,
   Previous,
@@ -58,7 +60,6 @@ const rows: Array<{
   image: string;
   pods: string;
   updatedTime: string;
-  selected?: boolean;
 }> = [
   {
     name: 'nginx-frontend',
@@ -77,7 +78,6 @@ const rows: Array<{
     image: 'kong:2.8',
     pods: '2/2',
     updatedTime: '1 day ago',
-    selected: true,
   },
   {
     name: 'redis-master',
@@ -88,11 +88,22 @@ const rows: Array<{
     pods: '1/2',
     updatedTime: '10 minutes ago',
   },
+  {
+    name: 'billing-worker',
+    description: 'finance',
+    status: 'running',
+    project: 'finance',
+    image: 'registry.local/billing-worker:v2.4.1',
+    pods: '4/4',
+    updatedTime: '1 hour ago',
+  },
 ];
 ```
 
 The row array above is abbreviated to keep the shell readable. Generated pages should use
-`8-10` visible mock rows by default unless the prompt asks for fewer rows.
+`8-10` visible mock rows by default unless the prompt asks for fewer rows. Basic list demos
+should start with no selected rows, then support selecting and unselecting rows through the
+table checkboxes so the selected-row outline can be verified interactively.
 
 ## Root Provider
 
@@ -113,11 +124,25 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 
 Keep this structure narrow for a basic list page. Do not add status cards, dashboard
 summaries, locale switchers, toast systems, modal workflows, animated loading screens, or
-column-management dialogs unless the user explicitly asks for those features.
+column-management dialogs. The toolbar Cogwheel uses a compact dropdown for column
+visibility; do not expand it into a modal unless the user explicitly asks for that flow.
 
 ```tsx
 export function ResourceListPage({ locale = 'zh' }: { locale?: Locale }) {
   const text = dictionary[locale];
+  const [selectedRows, setSelectedRows] = useState<Set<string>>(() => new Set());
+  const [visibleColumns, setVisibleColumns] = useState<VisibleColumns>(defaultVisibleColumns);
+  const toggleRow = (name: string) => {
+    setSelectedRows((current) => {
+      const next = new Set(current);
+      if (next.has(name)) next.delete(name);
+      else next.add(name);
+      return next;
+    });
+  };
+  const toggleColumn = (key: ColumnKey) => {
+    setVisibleColumns((current) => ({ ...current, [key]: !current[key] }));
+  };
 
   return (
     <div className="ks-console">
@@ -128,9 +153,14 @@ export function ResourceListPage({ locale = 'zh' }: { locale?: Locale }) {
           <PageHeader title={text[resourceConfig.titleKey]} />
           <section className="ks-content">
             <div className="ks-list-surface">
-              <ListToolbar locale={locale} />
+              <ListToolbar locale={locale} visibleColumns={visibleColumns} onToggleColumn={toggleColumn} />
               <div className="ks-table-main">
-                <ResourceTable locale={locale} />
+                <ResourceTable
+                  locale={locale}
+                  selectedRows={selectedRows}
+                  visibleColumns={visibleColumns}
+                  onToggleRow={toggleRow}
+                />
               </div>
               <TablePagination locale={locale} total={rows.length} page={1} pages={1} />
             </div>
@@ -211,6 +241,24 @@ function ManagementEntry({ label, active, icon }: { label: string; active: boole
 
 ```tsx
 const workloadChildKeys = ['deployments', 'statefulsets', 'daemonsets', 'jobs', 'cronjobs', 'pods'] as const;
+const customizableColumns = [
+  { key: 'status', labelKey: 'status' },
+  { key: 'project', labelKey: 'project' },
+  { key: 'primaryColumn', labelKey: resourceConfig.primaryColumn },
+  { key: 'secondaryColumn', labelKey: resourceConfig.secondaryColumn },
+  { key: 'updatedTime', labelKey: 'updatedTime' },
+] as const;
+
+type ColumnKey = (typeof customizableColumns)[number]['key'];
+type VisibleColumns = Record<ColumnKey, boolean>;
+
+const defaultVisibleColumns: VisibleColumns = {
+  status: true,
+  project: true,
+  primaryColumn: true,
+  secondaryColumn: true,
+  updatedTime: true,
+};
 
 function ResourceSidebar({ locale, activeView, activeKey }: { locale: Locale; activeView: ManagementView; activeKey: string }) {
   const text = dictionary[locale];
@@ -255,7 +303,15 @@ function PageHeader({ title }: { title: string }) {
   return <div className="ks-page-header"><h1>{title}</h1></div>;
 }
 
-function ListToolbar({ locale }: { locale: Locale }) {
+function ListToolbar({
+  locale,
+  visibleColumns,
+  onToggleColumn,
+}: {
+  locale: Locale;
+  visibleColumns: VisibleColumns;
+  onToggleColumn: (key: ColumnKey) => void;
+}) {
   const text = dictionary[locale];
 
   return (
@@ -276,53 +332,104 @@ function ListToolbar({ locale }: { locale: Locale }) {
       </div>
       <div className="ks-toolbar-actions">
         <Button className="ks-toolbar-icon-button" variant="text" aria-label={text.refresh}><Refresh size={16} /></Button>
-        <Button className="ks-toolbar-icon-button" variant="text" aria-label={text.tableSettings}><Cogwheel size={16} /></Button>
+        <Dropdown
+          content={<ColumnSettingsMenu locale={locale} visibleColumns={visibleColumns} onToggleColumn={onToggleColumn} />}
+          placement="bottom-end"
+          maxWidth={160}
+        >
+          <Button className="ks-toolbar-icon-button" variant="text" aria-label={text.tableSettings}><Cogwheel size={16} /></Button>
+        </Dropdown>
         <Button className="ks-command-button" variant="filled" color="secondary" radius="xl" size="sm" shadow>{text.create}</Button>
       </div>
     </div>
   );
 }
 
-function ResourceTable({ locale }: { locale: Locale }) {
+function ColumnSettingsMenu({
+  locale,
+  visibleColumns,
+  onToggleColumn,
+}: {
+  locale: Locale;
+  visibleColumns: VisibleColumns;
+  onToggleColumn: (key: ColumnKey) => void;
+}) {
+  const text = dictionary[locale];
+
+  return (
+    <Menu width={160} className="menu-setting ks-column-panel">
+      <MenuLabel>{text.customColumns}</MenuLabel>
+      {customizableColumns.map((column) => (
+        <MenuItem
+          key={column.key}
+          className={visibleColumns[column.key] ? 'ks-column-menu-item is-visible' : 'ks-column-menu-item'}
+          icon={visibleColumns[column.key] ? <Eye size={16} /> : <EyeClosed size={16} />}
+          onClick={() => onToggleColumn(column.key)}
+        >
+          {text[column.labelKey]}
+        </MenuItem>
+      ))}
+    </Menu>
+  );
+}
+
+function ResourceTable({
+  locale,
+  selectedRows,
+  visibleColumns,
+  onToggleRow,
+}: {
+  locale: Locale;
+  selectedRows: Set<string>;
+  visibleColumns: VisibleColumns;
+  onToggleRow: (name: string) => void;
+}) {
   const text = dictionary[locale];
   const IdentityIcon = resourceConfig.identityIcon;
 
   return (
     <table className="ks-resource-table">
+      <colgroup>
+        <col className="ks-select-col" />
+        <col />
+        {customizableColumns.map((column) => visibleColumns[column.key] && <col key={column.key} />)}
+        <col className="ks-action-col" />
+      </colgroup>
       <thead>
         <tr>
           <th className="ks-select-cell"><Checkbox /></th>
           <th>{text.name}</th>
-          <th>{text.status}</th>
-          <th>{text.project}</th>
-          <th>{text[resourceConfig.primaryColumn]}</th>
-          <th>{text[resourceConfig.secondaryColumn]}</th>
-          <th>{text.updatedTime}</th>
+          {customizableColumns.map(
+            (column) => visibleColumns[column.key] && <th key={column.key}>{text[column.labelKey]}</th>,
+          )}
           <th className="ks-action-cell" />
         </tr>
       </thead>
       <tbody>
-        {rows.map((row) => (
-          <tr key={row.name} className={row.selected ? 'row-selected' : undefined}>
-            <td className="ks-select-cell"><Checkbox checked={row.selected} /></td>
+        {rows.map((row) => {
+          const selected = selectedRows.has(row.name);
+          return (
+          <tr key={row.name} className={selected ? 'row-selected' : undefined}>
+            <td className="ks-select-cell"><Checkbox checked={selected} onChange={() => onToggleRow(row.name)} /></td>
             <td>
               <div className="ks-object-identity">
                 <span className="ks-object-icon" aria-hidden="true"><IdentityIcon size={40} /></span>
                 <span><strong>{row.name}</strong><small>{row.description}</small></span>
               </div>
             </td>
-            <td><span className={`ks-status-dot is-${row.status}`} /><span className="ks-status-text">{text[row.status]}</span></td>
-            <td>{row.project}</td>
-            <td>{row.image}</td>
-            <td>{row.pods}</td>
-            <td className="ks-muted">{row.updatedTime}</td>
+            {visibleColumns.status && <td><span className={`ks-status-dot is-${row.status}`} /><span className="ks-status-text">{text[row.status]}</span></td>}
+            {visibleColumns.project && <td>{row.project}</td>}
+            {visibleColumns.primaryColumn && <td>{row.image}</td>}
+            {visibleColumns.secondaryColumn && <td>{row.pods}</td>}
+            {visibleColumns.updatedTime && <td>{row.updatedTime}</td>}
             <td className="ks-action-cell">
-              <Dropdown content={<RowMenu locale={locale} />}>
+              <Dropdown content={<RowMenu locale={locale} />} placement="bottom-end" maxWidth={160}>
                 <Button className="ks-row-more" variant="text" radius="xl" size="sm" aria-label={text.more}><More size={16} /></Button>
               </Dropdown>
             </td>
           </tr>
-        ))}
+        );
+        })}
       </tbody>
     </table>
   );
@@ -342,15 +449,26 @@ function RowMenu({ locale }: { locale: Locale }) {
 
 function TablePagination({ locale, total, page, pages }: { locale: Locale; total: number; page: number; pages: number }) {
   const text = dictionary[locale];
+  const pageSizeOptions = [10, 20, 50, 100];
 
   return (
     <footer className="ks-pagination">
       <div className="ks-pagination-left">
-        <Button className="ks-page-size" variant="text" radius="sm">
-          <span>{text.perPage}</span>
-          <span>10</span>
-          <ChevronDown size={14} />
-        </Button>
+        <Dropdown
+          content={
+            <Menu className="ks-page-size-menu">
+              {pageSizeOptions.map((size) => (
+                <MenuItem key={size}>{size}</MenuItem>
+              ))}
+            </Menu>
+          }
+        >
+          <Button className="ks-page-size" variant="text" radius="sm" aria-label={text.perPage}>
+            <span>{text.perPage}</span>
+            <span>10</span>
+            <ChevronDown size={14} />
+          </Button>
+        </Dropdown>
         <span className="ks-pagination-divider" />
         <span className="ks-muted">{text.total(total)}</span>
       </div>
@@ -385,31 +503,33 @@ button, input, textarea, select { font: inherit; }
 .ks-component-dock { min-width: 84px; height: 36px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 0; border-radius: 18px; background: var(--ks-subtle); padding: 0 16px; color: var(--ks-text); font-size: 12px; font-weight: 600; white-space: nowrap; }
 .ks-component-dock:hover { background: #eff4f9; border-radius: 8px; }
 .ks-header-divider { width: 1px; height: 20px; margin: 0 12px; background: var(--ks-border); }
-.ks-profile-trigger { height: 36px; display: inline-flex; align-items: center; gap: 12px; border: 0; background: transparent; padding: 0; color: var(--ks-text); font-size: 12px; font-weight: 600; }
+.ks-profile-trigger { height: 36px; display: inline-flex; align-items: center; gap: 12px; border: 0; background: transparent; padding: 0; color: var(--ks-text); font-size: 12px; font-weight: 600; text-align: left; }
 .ks-avatar { width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--ks-bg); }
 .ks-profile-text, .ks-scope-selector span, .ks-object-identity span { display: flex; flex-direction: column; min-width: 0; }
+.ks-profile-text { align-items: flex-start; text-align: left; }
+.ks-profile-text strong, .ks-profile-text span { display: block; width: 100%; text-align: left; }
 .ks-profile-text span, .ks-muted, .ks-scope-selector small, .ks-object-identity small { color: var(--ks-muted); font-size: 12px; }
 .ks-console-body { display: flex; min-height: calc(100vh - 64px); }
 .ks-sidebar { width: 220px; flex: 0 0 220px; padding: 16px 12px 12px; background: #fff; border-right: 1px solid var(--ks-border); }
 .ks-scope-selector { width: 196px; height: 68px; display: grid; grid-template-columns: minmax(0, 1fr) 16px; align-items: center; gap: 4px; padding: 12px; border: 1px solid var(--ks-border-strong); border-radius: 4px; background: linear-gradient(359.02deg, #f9fbfd 0.81%, #ffffff 99.13%); text-align: left; }
-.ks-resource-nav { margin-top: 24px; }
-.ks-nav-row { width: 100%; height: 36px; display: grid; grid-template-columns: 20px 1fr 16px; align-items: center; gap: 8px; border: 0; background: transparent; color: var(--ks-nav-text); font-size: 12px; text-align: left; }
-.ks-nav-row.is-open { color: var(--ks-active); font-weight: 600; }
+.ks-resource-nav { margin-top: 12px; }
+.ks-nav-row { width: 100%; height: 36px; display: grid; grid-template-columns: 20px 1fr 16px; align-items: center; gap: 8px; border: 0; background: transparent; color: var(--ks-nav-text); font-size: 12px; font-weight: 500; text-align: left; }
+.ks-nav-row.is-open { color: var(--ks-active); font-weight: 500; }
 .ks-nav-row.is-open svg { color: var(--ks-icon-active); }
-.ks-nav-child { width: 100%; height: 36px; display: block; padding: 0 0 0 44px; border: 0; background: transparent; color: var(--ks-nav-text); font-size: 12px; text-align: left; }
-.ks-nav-child.is-active { color: var(--ks-active); font-weight: 600; }
+.ks-nav-child { width: 100%; height: 36px; display: block; padding: 0 0 0 44px; border: 0; background: transparent; color: var(--ks-nav-text); font-size: 12px; font-weight: 500; text-align: left; }
+.ks-nav-child.is-active { color: var(--ks-active); font-weight: 500; }
 .ks-main { flex: 1; min-width: 0; background: var(--ks-bg); }
 .ks-page-header { height: 56px; display: flex; align-items: center; padding: 0 20px; background: #fff; border-bottom: 1px solid var(--ks-border); }
 .ks-page-header h1 { margin: 0; font-size: 18px; line-height: 24px; font-weight: 600; }
 .ks-content { padding: 20px; }
 .ks-list-surface { overflow: visible; background: #fff; border-radius: 4px; box-shadow: 0 2px 4px rgba(36, 46, 66, 0.04); }
-.ks-list-toolbar { min-height: 56px; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 10px 20px; background: var(--ks-subtle); border-bottom: 1px solid var(--ks-border); box-sizing: border-box; overflow: visible; }
+.ks-list-toolbar { position: relative; min-height: 56px; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 10px 20px; background: var(--ks-subtle); box-shadow: 0 1px 0 0 var(--ks-border); border-top-left-radius: 4px; border-top-right-radius: 4px; box-sizing: border-box; overflow: visible; }
 .ks-toolbar-left, .ks-toolbar-search, .ks-toolbar-actions { min-width: 0; height: 32px; display: flex; align-items: center; }
 .ks-toolbar-left { flex: 0 0 auto; }
 .ks-toolbar-search { min-width: 0; overflow: visible; }
 .ks-toolbar-actions { flex: 0 0 auto; justify-content: flex-end; gap: 12px; white-space: nowrap; }
 .ks-project-filter, .ks-filter-input, .ks-command-button { height: 32px; font-size: 12px; }
-.ks-project-filter { width: 148px !important; min-width: 148px !important; max-width: 148px !important; flex: 0 0 148px; }
+.ks-project-filter { width: 240px !important; min-width: 240px !important; max-width: 240px !important; flex: 0 0 240px; }
 .ks-project-filter .kubed-select-selector { width: 100%; height: 32px !important; min-height: 32px !important; box-sizing: border-box; display: flex; align-items: center; padding: 0 34px 0 12px; }
 .ks-project-filter .kubed-select-arrow { display: inline-flex !important; align-items: center; justify-content: center; right: 10px; opacity: 1 !important; visibility: visible !important; pointer-events: none; color: #324558; }
 .ks-project-filter .kubed-select-arrow svg { color: #324558; fill: #b6c2cd; }
@@ -422,17 +542,22 @@ button, input, textarea, select { font: inherit; }
 .ks-toolbar-icon-button > * { width: auto; min-width: 16px; height: 32px; min-height: 32px; display: inline-flex; align-items: center; justify-content: center; padding: 0; }
 .ks-row-more { width: auto; min-width: 56px; height: 32px; min-height: 32px; max-height: 32px; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 16px; background: transparent; box-shadow: none; color: #36435c; padding: 0 20px; }
 .ks-row-more > * { width: auto; min-width: 16px; height: 32px; min-height: 32px; display: inline-flex; align-items: center; justify-content: center; padding: 0; }
-.ks-pagination-icon { width: auto; min-width: auto; max-width: none; height: 32px; min-height: 32px; max-height: 32px; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 4px; background: transparent; box-shadow: none; color: #36435c; padding: 5px 12px; flex: 0 0 auto; overflow: visible; }
+.ks-pagination-icon { width: 32px !important; min-width: 32px !important; max-width: 32px !important; height: 32px; min-height: 32px; max-height: 32px; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 4px; background: transparent; box-shadow: none; color: #36435c; padding: 0 !important; flex: 0 0 auto; overflow: visible; }
 .ks-pagination-icon > * { width: auto; min-width: 20px; height: 20px; min-height: 20px; display: inline-flex; align-items: center; justify-content: center; padding: 0; }
 .ks-toolbar-icon-button svg, .ks-row-more svg, .ks-pagination-icon svg { flex: 0 0 auto; }
 .ks-toolbar-icon-button:hover, .ks-row-more:hover, .ks-pagination-icon:hover { background: var(--ks-bg); }
 .ks-command-button { min-width: 88px; padding: 0 20px; border: 0; border-radius: 16px; background: var(--ks-text); color: #fff; font-weight: 600; }
 .ks-table-main { margin: 0 12px 12px; }
-.ks-resource-table { width: 100%; border-collapse: separate; border-spacing: 0; table-layout: fixed; }
-.ks-resource-table th, .ks-resource-table td { height: 56px; border-bottom: 1px solid var(--ks-border); padding: 0 12px; text-align: left; vertical-align: middle; font-size: 12px; }
-.ks-resource-table th { height: 44px; background: #fff; color: var(--ks-muted); font-weight: 600; }
-.ks-select-cell { width: 44px; }
-.ks-action-cell { width: 80px; padding: 0 12px; text-align: center; }
+.ks-resource-table { width: 100%; text-align: left; border-collapse: collapse; border-spacing: 0; table-layout: fixed; }
+.ks-resource-table th { padding: 16px 12px; background: #fff; color: var(--ks-muted); cursor: pointer; font-size: 12px; font-weight: 600; line-height: 1.67; text-align: left; vertical-align: middle; }
+.ks-resource-table td { height: 56px; padding: 8px 12px; border-top: 1px solid var(--ks-hover); color: var(--ks-text); font-size: 12px; font-weight: 400; line-height: 1.67; text-align: left; vertical-align: middle; word-break: break-all; box-sizing: border-box; }
+.ks-resource-table tbody tr:last-child td { border-bottom: 1px solid var(--ks-hover); }
+.ks-select-col { width: 40px; }
+.ks-action-col { width: 80px; }
+.ks-select-cell { width: 40px; min-width: 40px; max-width: 40px; text-align: center; box-sizing: border-box; }
+.ks-action-cell { width: 80px; min-width: 80px; max-width: 80px; text-align: center; box-sizing: border-box; }
+.ks-resource-table td:first-child { border-left: 1px solid transparent; }
+.ks-resource-table td:last-child { border-right: 1px solid transparent; }
 .ks-object-identity { display: grid; grid-template-columns: 40px minmax(0, 1fr); align-items: center; gap: 12px; }
 .ks-object-icon { width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; background: transparent; border: 0; }
 .ks-object-identity strong { color: var(--ks-text); font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -443,18 +568,49 @@ button, input, textarea, select { font: inherit; }
 .ks-status-dot.is-updating { background: var(--ks-warning); }
 .ks-status-dot.is-error { background: var(--ks-error); }
 .ks-status-dot.is-waiting { background: #b6c2cd; }
-.ks-resource-table tbody tr.row-selected td { background: var(--ks-bg); border-top: 1px solid var(--ks-active); border-bottom: 1px solid var(--ks-active); }
-.ks-resource-table tbody tr.row-selected td:first-child { border-left: 1px solid var(--ks-active); }
-.ks-resource-table tbody tr.row-selected td:last-child { border-right: 1px solid var(--ks-active); }
-.ks-pagination { height: 52px; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 20px; background: var(--ks-subtle); border-top: 1px solid var(--ks-border); overflow: visible; }
+.ks-resource-table tbody tr:not(.row-selected):hover td { background: var(--ks-hover); }
+.ks-resource-table tbody tr.row-selected td,
+.ks-resource-table tbody tr.row-selected:hover td,
+.ks-resource-table tbody tr:has(input[type="checkbox"]:checked) td,
+.ks-resource-table tbody tr:has(input[type="checkbox"]:checked):hover td { background: var(--ks-hover); border-top: 1px solid var(--ks-active); }
+.ks-resource-table tbody tr.row-selected td:first-child,
+.ks-resource-table tbody tr.row-selected:hover td:first-child,
+.ks-resource-table tbody tr:has(input[type="checkbox"]:checked) td:first-child,
+.ks-resource-table tbody tr:has(input[type="checkbox"]:checked):hover td:first-child { border-left: 1px solid var(--ks-active); }
+.ks-resource-table tbody tr.row-selected td:last-child,
+.ks-resource-table tbody tr.row-selected:hover td:last-child,
+.ks-resource-table tbody tr:has(input[type="checkbox"]:checked) td:last-child,
+.ks-resource-table tbody tr:has(input[type="checkbox"]:checked):hover td:last-child { border-right: 1px solid var(--ks-active); }
+.ks-resource-table tbody tr:last-child.row-selected td,
+.ks-resource-table tbody tr:last-child:has(input[type="checkbox"]:checked) td { border-bottom: 1px solid var(--ks-active); }
+.ks-resource-table tbody tr.row-selected + tr td,
+.ks-resource-table tbody tr:has(input[type="checkbox"]:checked) + tr td { border-top: 1px solid var(--ks-active); }
+.ks-resource-table tbody tr.row-selected + .row-selected td,
+.ks-resource-table tbody tr:has(input[type="checkbox"]:checked) + tr:has(input[type="checkbox"]:checked) td { border-top: 1px solid transparent; }
+.ks-row-menu, .ks-row-menu .kubed-menu, .ks-row-menu [role="menu"] { width: 160px !important; min-width: 160px !important; max-width: 160px !important; box-sizing: border-box; }
+.ks-row-menu button, .ks-row-menu [role="menuitem"] { width: 100%; box-sizing: border-box; }
+.tippy-content:has(.ks-column-panel) { width: 160px; min-width: 160px; max-width: 160px; padding: 0 !important; box-sizing: border-box; }
+.ks-column-panel.menu-setting { width: 160px !important; min-width: 160px !important; max-width: 160px !important; padding: 4px 0 !important; border-radius: 4px; background: #242e42 !important; background-color: #242e42 !important; box-shadow: 0 4px 8px rgba(36, 46, 66, 0.2); overflow: hidden; box-sizing: border-box; color: #fff !important; }
+.ks-column-panel.menu-setting .menu-label { min-height: 20px; display: flex; align-items: center; margin: 0; padding: 8px 12px !important; color: #fff !important; font-size: 12px; font-weight: 600; line-height: 20px; }
+.ks-column-panel.menu-setting button, .ks-column-panel.menu-setting [role="menuitem"] { width: 160px; min-width: 160px; max-width: 160px; min-height: 32px; height: auto; padding: 6px 12px !important; background: transparent !important; border: 0; border-radius: 0; box-sizing: border-box; color: #fff !important; font-weight: 400 !important; line-height: 20px; }
+.ks-column-panel.menu-setting button:hover, .ks-column-panel.menu-setting [role="menuitem"]:hover { background: #36435c !important; }
+.ks-column-menu-item .item-inner, .menu-setting .item-inner { height: 20px; display: flex; align-items: center; color: #fff; font-size: 12px; font-weight: 400; line-height: 20px; }
+.menu-setting .item-icon { width: 16px; height: 16px; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 16px; margin-right: 12px; }
+.menu-setting .item-body { min-width: 0; display: flex; align-items: center; }
+.menu-setting .item-label { overflow: hidden; color: #fff; text-overflow: ellipsis; white-space: nowrap; }
+.ks-column-menu-item svg, .menu-setting .item-icon svg { flex: 0 0 auto; }
+.ks-pagination { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 10px 20px; background: var(--ks-subtle); border-bottom-left-radius: 4px; border-bottom-right-radius: 4px; color: var(--ks-muted); overflow: visible; }
 .ks-pagination-left, .ks-pagination-right, .ks-page-size { display: inline-flex; align-items: center; gap: 8px; }
 .ks-pagination-left, .ks-pagination-right { min-width: 0; }
 .ks-pagination-right { flex: 0 0 auto; padding-right: 0; }
-.ks-page-size { height: 32px; display: inline-flex; align-items: center; border: 0; border-radius: 4px; background: transparent; color: var(--ks-text); font-size: 12px; font-weight: 600; line-height: 20px; padding: 5px 12px; }
+.ks-page-size { height: 32px; display: inline-flex; align-items: center; border: 0; border-radius: 4px; background: transparent; color: var(--ks-text); font-size: 12px; font-weight: 600; line-height: 20px; padding: 5px 8px; }
 .ks-page-size > div { display: inline-flex; align-items: center; height: 20px; line-height: 20px; }
 .ks-page-size > div > span { display: inline-flex; align-items: center; gap: 4px; height: 20px; line-height: 20px; }
 .ks-page-size > div > span > span, .ks-page-size > div > span > svg { display: inline-flex; align-items: center; line-height: 20px; }
 .ks-page-size svg { flex: 0 0 auto; margin-top: 0; }
+.tippy-content:has(.ks-page-size-menu) { width: 96px; min-width: 96px; max-width: 96px; padding: 0 !important; box-sizing: border-box; }
+.ks-page-size-menu, .ks-page-size-menu .kubed-menu, .ks-page-size-menu [role="menu"] { width: 96px; min-width: 96px; max-width: 96px; box-sizing: border-box; padding: 8px !important; }
+.ks-page-size-menu button, .ks-page-size-menu [role="menuitem"] { width: 80px; min-width: 80px; max-width: 80px; margin-left: 0 !important; margin-right: 0 !important; box-sizing: border-box; }
 .ks-pagination-divider { width: 1px; height: 16px; background: var(--ks-border); }
 ```
 
@@ -483,6 +639,7 @@ const dictionary = {
     searchPlaceholder: '搜索名称、IP 或节点...',
     refresh: '刷新',
     tableSettings: '表格设置',
+    customColumns: '定制内容',
     create: '创建',
     name: '名称',
     status: '状态',
@@ -496,10 +653,10 @@ const dictionary = {
     edit: '编辑',
     viewYaml: '查看配置文件 (YAML)',
     delete: '删除',
-    perPage: '每页行数:',
+    perPage: '每页显示',
     previous: '上一页',
     next: '下一页',
-    total: (count: number) => `共 ${count} 条记录`,
+    total: (count: number) => `总数：${count}`,
   },
   en: {
     managementViews: 'Management views',
@@ -522,6 +679,7 @@ const dictionary = {
     searchPlaceholder: 'Search by name, IP, or node...',
     refresh: 'Refresh',
     tableSettings: 'Table Settings',
+    customColumns: 'Custom Columns',
     create: 'Create',
     name: 'Name',
     status: 'Status',
@@ -535,10 +693,10 @@ const dictionary = {
     edit: 'Edit',
     viewYaml: 'View YAML',
     delete: 'Delete',
-    perPage: 'Rows per page:',
+    perPage: 'Rows per page',
     previous: 'Previous page',
     next: 'Next page',
-    total: (count: number) => `Total: ${count} items`,
+    total: (count: number) => `Total: ${count}`,
   },
 } as const;
 ```

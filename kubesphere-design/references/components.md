@@ -12,9 +12,11 @@ are borderless/backgroundless and no-shadow at rest.
 
 Do not treat all icon-only buttons the same. Toolbar Refresh/Cogwheel and table Row More
 are kube-design text buttons with icon only, `32px` height, and `0 20px` horizontal
-padding. Pagination arrows are kube-design text buttons with `32px` height, `5px 12px`
-padding, and `4px` radius, not pill buttons or custom raw square buttons. Pagination
-page-size controls also use `4px` radius.
+padding. Pagination arrows are kube-design text buttons with exact `32px x 32px`, `0`
+padding, and `4px` radius, not pill buttons or wide text buttons. Pagination page-size
+controls also use `4px` radius. Their dropdown visual panel is fixed at `96px` width with
+`0` popover content padding; the menu is `96px` wide with `8px` side padding, and the
+options are `80px` wide with no extra side margin.
 
 Do not create a local `Button` abstraction that maps custom class names to visual variants.
 That usually produces a page that looks close in code but diverges in focus, hover, sizing,
@@ -70,6 +72,9 @@ Both should ellipsis rather than wrap.
 The icon slot is a `40px` alignment box, not a card. Do not add a gray background, border,
 or mini-tile behind the resource icon.
 
+For ordinary table cells outside the Object Identity pattern, use primary text color and
+regular `400` weight. Do not apply secondary color to normal values such as updated time.
+
 ## Dropdowns And Menus
 
 Use compact overflow menus. The row action trigger is `More size={16}` inside a text
@@ -77,8 +82,14 @@ button. Table row operation menu items should use normal menu text color, includ
 Delete/删除. Use error color for destructive confirmation buttons, not for ordinary table
 row menu text.
 
-The trigger must remain visible and centered in the last table cell. Avoid clipping caused
-by `overflow: hidden`, too-narrow action columns, or dropdown wrappers that exceed the cell.
+The trigger must remain visible and centered in the fixed `80px` action cell. Avoid
+clipping caused by `overflow: hidden`, too-narrow action columns, or dropdown wrappers that
+exceed the cell.
+
+Use `Dropdown placement="bottom-end"` for row action menus so the panel's right edge aligns
+with the More trigger's right edge. Keep compact row menus around `160px` max width, and
+constrain the inner `.ks-row-menu` / menu node to the same width so it cannot overflow the
+aligned tippy panel.
 
 ## Form Controls
 
@@ -106,8 +117,24 @@ version still renders no visible arrow, pass an explicit `suffixIcon` with
 custom selector padding or search-input width.
 
 Column-management dialogs, delete confirmation modals, toast notifications, and runtime
-locale switches are outside the basic list-page recipe unless explicitly requested. Adding
-them during a list-page task usually lowers frame fidelity.
+locale switches are outside the basic list-page recipe unless explicitly requested. For
+basic list pages, use only the toolbar Cogwheel's compact column visibility dropdown:
+toggle normal data columns, keep the first Object Identity column and final operation
+column fixed, and avoid adding a larger settings modal. The column visibility dropdown
+uses the DataTable settings menu shape: `Dropdown placement="bottom-end" maxWidth={160}`,
+`Menu width={160} className="menu-setting"`, `MenuLabel`, and `MenuItem` rows. The menu is
+dark, `4px` radius, `padding: 4px 0`, shadowed, with title `定制内容` / `Custom Columns`;
+label padding is `8px 12px`. Rows use `padding: 6px 12px`, regular `400` text,
+dark-hover background, `Eye size={16}` for visible columns, and `EyeClosed size={16}` for
+hidden columns. Preserve the stable semantic structure `.menu-setting`, `.menu-label`,
+`.item-inner`, `.item-icon`, `.item-body`, and `.item-label`; do not copy generated
+`sc-*` hash classes. Do not render checkbox rows, blue selected panels, or a modal for this
+control.
+
+Keep the trigger interaction native to kube-design Dropdown: clicking the Cogwheel opens the
+menu, and clicking the same Cogwheel again closes it. Do not set `hideOnClick={false}` on
+the column-settings Dropdown and do not replace this with custom popover state unless the
+installed package lacks a working Dropdown.
 
 ## Typography
 

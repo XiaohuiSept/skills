@@ -26,6 +26,9 @@ invent shell layout beyond the page shell.
 - Profile is a compact transparent account trigger, preferably named
   `.ks-profile-trigger`. Do not put the entire profile in a gray/bordered pill; keep the
   avatar, text stack, and chevron aligned with `12px` spacing.
+- Profile text stack must be left-aligned. Set `.ks-profile-trigger { text-align: left }`
+  and `.ks-profile-text { align-items: flex-start; text-align: left }`; do not let the
+  button's default center text alignment center the username while the role appears offset.
 
 ## Sidebar
 
@@ -33,10 +36,14 @@ invent shell layout beyond the page shell.
 - Scoped selector is about `196px x 68px`, bordered, light, with title, subtitle, and a
   right-side chevron. In expanded sidebar state it does not show a leading Cluster or
   Workspace resource icon.
+- Resource navigation starts `12px` below the scope selector.
 - Scope selector should look like a light field/card, not an active navigation item. Do not
   add a large leading icon, green active icon, or black-only scope glyph.
 - Parent nav rows are `36px`, single-line, with semantic duotone icon.
 - Child rows are text-only by default and indented.
+- Sidebar menu labels use `500` font weight for parent rows, expanded parent rows, and
+  active child rows. Do not use `600` or `700`; active state is carried by brand color and
+  duotone icon color rather than heavier text.
 - Active text is `#55bc8a`.
 - Active parent icons set `color="#00aa72"` and `fill="#90e0c5"`.
 - When a child menu item is active, its expanded parent row also uses active brand text
@@ -57,5 +64,6 @@ invent shell layout beyond the page shell.
 Reject dark sidebars, fake logos, visible top management text labels beside desktop icons,
 missing Component Dock, Cogwheel-as-Component-Dock, inactive Workspace/Cluster icons that
 look black or single-channel, bordered custom Component Dock chips, oversized profile
-pills, scope selectors with leading resource icons or active-nav styling, expanded parent
-rows with strong outlined/pill styling, and child rows with default icons.
+pills, centered/staggered profile username/role text, scope selectors with leading resource
+icons or active-nav styling, expanded parent rows with strong outlined/pill styling, and
+child rows with default icons.

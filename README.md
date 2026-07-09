@@ -9,30 +9,6 @@ Use it with Codex, Claude Code, OpenCode, or other coding agents when you want g
 to follow KubeSphere-style console structure, visual rules, component usage, icon mapping,
 and terminology.
 
-## Structure
-
-```text
-kubesphere-design/
-  SKILL.md
-  DESIGN.md
-  assets/
-    tokens.md
-    icon-map.md
-    recipes.md
-    page-shells/
-      list.md
-  references/
-    console-frame.md
-    list-pages.md
-    components.md
-    language.md
-    case-studies/
-```
-
-`SKILL.md` is the main entry for agents. It routes the task and tells the agent which
-supporting files to read. `DESIGN.md` provides the visual contract. Files under `assets/`
-and `references/` provide reusable rules, page shells, recipes, and failure patterns.
-
 ## Usage
 
 Give the `kubesphere-design/` folder to your agent and include a prompt like:
